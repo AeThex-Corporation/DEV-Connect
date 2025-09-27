@@ -17,6 +17,7 @@ import { signup, login } from "./routes/auth-local";
 import { query } from "./db";
 
 async function ensureSchema() {
+  // Profiles
   await query(
     `CREATE TABLE IF NOT EXISTS profiles (
       id SERIAL PRIMARY KEY,
@@ -38,6 +39,18 @@ async function ensureSchema() {
   );
   await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT`);
   await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_url TEXT`);
+
+  // Local users (email unique)
+  await query(
+    `CREATE TABLE IF NOT EXISTS users_local (
+      id SERIAL PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      display_name TEXT,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
 }
 
 export function createServer() {
