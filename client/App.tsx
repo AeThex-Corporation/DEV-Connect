@@ -41,6 +41,7 @@ const App = () => (
                 <Route path="/u/:stackUserId" element={<ProfileView />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/messages" element={<Messages />} />
+                <Route path="/settings" element={<Settings />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Route>
