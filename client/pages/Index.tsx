@@ -316,8 +316,8 @@ function CTASection() {
         <Button asChild size="lg">
           <Link to="/jobs">Browse jobs</Link>
         </Button>
-        <Button size="lg" variant="outline">
-          Create profile
+        <Button asChild size="lg" variant="outline">
+          <Link to="/onboarding">Create profile</Link>
         </Button>
       </div>
     </section>
