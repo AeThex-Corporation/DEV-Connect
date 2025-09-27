@@ -32,6 +32,14 @@ export default function ProfileView() {
 
   const tags = p.tags ?? [];
 
+  async function favorite() {
+    await fetch('/api/favorites/toggle', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ favorite_stack_user_id: p!.stack_user_id, stack_user_id: localStorage.getItem('rbx_user') ? JSON.parse(localStorage.getItem('rbx_user') as string).id : '' }) });
+  }
+
+  async function connect() {
+    window.location.href = `/messages?peer=${encodeURIComponent(p!.stack_user_id)}`;
+  }
+
   return (
     <div className="mx-auto max-w-3xl">
       <div className="flex items-start justify-between gap-4">
@@ -40,6 +48,8 @@ export default function ProfileView() {
           <p className="text-muted-foreground">{p.role || "Developer"}</p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={connect}>Connect</Button>
+          <Button variant="outline" onClick={favorite}>Favorite</Button>
           <Button asChild><Link to={`/messages?peer=${encodeURIComponent(p.stack_user_id)}`}>Message</Link></Button>
         </div>
       </div>
