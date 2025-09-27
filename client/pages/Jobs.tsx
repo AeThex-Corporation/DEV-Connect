@@ -1,41 +1,35 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Filter, Search, Star } from "lucide-react";
-
-interface Job {
-  id: string;
-  title: string;
-  role: string;
-  comp: "Percent" | "Robux" | "USD/Hourly" | "Rev Share";
-  genre: string;
-  scope: "Small task" | "Full Game" | "Long-term";
-  experience: "Junior" | "Mid" | "Senior";
-}
-
-const JOBS: Job[] = [
-  { id: "1", title: "Lead Scripter for Simulator", role: "Scripter", comp: "USD/Hourly", genre: "Simulator", scope: "Long-term", experience: "Senior" },
-  { id: "2", title: "Terrain Artist", role: "Builder", comp: "Robux", genre: "Adventure", scope: "Small task", experience: "Mid" },
-  { id: "3", title: "UI/UX Designer", role: "Designer", comp: "Rev Share", genre: "FPS", scope: "Full Game", experience: "Senior" },
-  { id: "4", title: "Animator for RPG", role: "Animator", comp: "Percent", genre: "RPG", scope: "Long-term", experience: "Mid" },
-];
+import { Filter, Search } from "lucide-react";
+import { apiGet, apiPost, Job } from "@/services/api";
+import { useUser } from "@stackframe/stack";
 
 export default function Jobs() {
+  const user = useUser();
   const [query, setQuery] = useState("");
   const [role, setRole] = useState<string | null>(null);
   const [comp, setComp] = useState<string | null>(null);
   const [genre, setGenre] = useState<string | null>(null);
-  const [experience, setExperience] = useState<string | null>(null);
 
-  const filtered = useMemo(() => {
-    return JOBS.filter((j) =>
-      (!query || j.title.toLowerCase().includes(query.toLowerCase())) &&
-      (!role || j.role === role) &&
-      (!comp || j.comp === comp) &&
-      (!genre || j.genre === genre) &&
-      (!experience || j.experience === experience)
-    );
-  }, [query, role, comp, genre, experience]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (role) params.set("role", role);
+    if (comp) params.set("comp", comp);
+    if (genre) params.set("genre", genre);
+    const data = await apiGet<Job[]>(`/api/jobs?${params.toString()}`);
+    setJobs(data);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+
+  const filtered = useMemo(() => jobs, [jobs]);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[280px,1fr]">
@@ -44,8 +38,7 @@ export default function Jobs() {
         <FilterGroup title="Role" value={role} onChange={setRole} options={["Scripter","Builder","Designer","Animator"]} />
         <FilterGroup title="Compensation" value={comp} onChange={setComp} options={["USD/Hourly","Robux","Percent","Rev Share"]} />
         <FilterGroup title="Genre" value={genre} onChange={setGenre} options={["Simulator","FPS","Adventure","RPG"]} />
-        <FilterGroup title="Experience" value={experience} onChange={setExperience} options={["Junior","Mid","Senior"]} />
-        <Button variant="ghost" className="w-full mt-2" onClick={() => { setRole(null); setComp(null); setGenre(null); setExperience(null); setQuery(""); }}>Reset</Button>
+        <Button variant="ghost" className="w-full mt-2" onClick={() => { setRole(null); setComp(null); setGenre(null); setQuery(""); load(); }}>Reset</Button>
       </aside>
 
       <section>
@@ -56,20 +49,67 @@ export default function Jobs() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e)=>{ if(e.key==='Enter'){ load(); } }}
                 placeholder="Search jobs..."
                 className="w-full rounded-md border bg-background pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
-            <div className="text-sm text-muted-foreground">{filtered.length} results</div>
+            <div className="text-sm text-muted-foreground">{loading ? "Loading..." : `${filtered.length} results`}</div>
           </div>
         </div>
 
+        {user && <CreateJob onCreated={load} stackUserId={user.id} />}
+
         <div className="mt-4 grid gap-4">
           {filtered.map((j) => (
-            <JobCard key={j.id} job={j} />
+            <JobCard key={j.id} job={j} stackUserId={user?.id} onApplied={load} />
           ))}
+          {!filtered.length && !loading && (
+            <div className="rounded-xl border bg-card p-6 text-center text-sm text-muted-foreground">No jobs found.</div>
+          )}
         </div>
       </section>
+    </div>
+  );
+}
+
+function CreateJob({ onCreated, stackUserId }: { onCreated: () => void; stackUserId: string }) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [role, setRole] = useState("");
+  const [comp, setComp] = useState("USD/Hourly");
+  const [genre, setGenre] = useState("");
+  const [scope, setScope] = useState("");
+  const [description, setDescription] = useState("");
+  const submit = async () => {
+    await apiPost(`/api/jobs`, { title, role, comp, genre, scope, description, stack_user_id: stackUserId });
+    setOpen(false);
+    setTitle(""); setRole(""); setGenre(""); setScope(""); setDescription("");
+    onCreated();
+  };
+  return (
+    <div className="mt-4 rounded-xl border bg-card p-5">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold">Post a job</h3>
+        <Button variant="outline" onClick={()=>setOpen(v=>!v)}>{open ? "Close" : "Open"}</Button>
+      </div>
+      {open && (
+        <div className="mt-4 grid gap-3">
+          <input className="rounded-md border bg-background px-3 py-2" placeholder="Title" value={title} onChange={(e)=>setTitle(e.target.value)} />
+          <div className="grid sm:grid-cols-3 gap-3">
+            <input className="rounded-md border bg-background px-3 py-2" placeholder="Role" value={role} onChange={(e)=>setRole(e.target.value)} />
+            <select className="rounded-md border bg-background px-3 py-2" value={comp} onChange={(e)=>setComp(e.target.value)}>
+              <option>USD/Hourly</option><option>Robux</option><option>Percent</option><option>Rev Share</option>
+            </select>
+            <input className="rounded-md border bg-background px-3 py-2" placeholder="Genre" value={genre} onChange={(e)=>setGenre(e.target.value)} />
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input className="rounded-md border bg-background px-3 py-2" placeholder="Scope" value={scope} onChange={(e)=>setScope(e.target.value)} />
+            <textarea className="rounded-md border bg-background px-3 py-2" placeholder="Description" value={description} onChange={(e)=>setDescription(e.target.value)} />
+          </div>
+          <div className="flex justify-end"><Button onClick={submit} disabled={!title || !role}>Publish</Button></div>
+        </div>
+      )}
     </div>
   );
 }
@@ -100,7 +140,14 @@ function FilterGroup({ title, options, value, onChange }: { title: string; optio
   );
 }
 
-function JobCard({ job }: { job: Job }) {
+function JobCard({ job, stackUserId, onApplied }: { job: Job; stackUserId?: string; onApplied: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const apply = async () => {
+    if (!stackUserId) return;
+    await apiPost(`/api/jobs/${job.id}/apply`, { applicant_stack_user_id: stackUserId, message });
+    setOpen(false); setMessage(""); onApplied();
+  };
   return (
     <article className="rounded-xl border bg-card p-5">
       <div className="flex items-start justify-between gap-4">
@@ -109,20 +156,26 @@ function JobCard({ job }: { job: Job }) {
           <dl className="mt-2 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-sm">
             <div><dt className="text-muted-foreground">Role</dt><dd>{job.role}</dd></div>
             <div><dt className="text-muted-foreground">Compensation</dt><dd>{job.comp}</dd></div>
-            <div><dt className="text-muted-foreground">Genre</dt><dd>{job.genre}</dd></div>
-            <div><dt className="text-muted-foreground">Scope</dt><dd>{job.scope}</dd></div>
+            <div><dt className="text-muted-foreground">Genre</dt><dd>{job.genre ?? "—"}</dd></div>
+            <div><dt className="text-muted-foreground">Scope</dt><dd>{job.scope ?? "—"}</dd></div>
           </dl>
-          <div className="mt-3 flex items-center gap-1 text-amber-500">
-            {[...Array(job.experience === "Senior" ? 5 : job.experience === "Mid" ? 4 : 3)].map((_, i) => (
-              <Star key={i} className="h-4 w-4 fill-current" />
-            ))}
-          </div>
         </div>
         <div className="shrink-0 flex flex-col gap-2">
-          <Button>Apply</Button>
-          <Button variant="outline">Save</Button>
+          {stackUserId ? (
+            <>
+              <Button onClick={()=>setOpen(v=>!v)}>{open ? "Cancel" : "Apply"}</Button>
+            </>
+          ) : (
+            <a href="/auth" className="text-sm underline">Sign in to apply</a>
+          )}
         </div>
       </div>
+      {open && (
+        <div className="mt-3 grid gap-2">
+          <textarea className="rounded-md border bg-background px-3 py-2" placeholder="Your pitch / relevant portfolio" value={message} onChange={(e)=>setMessage(e.target.value)} />
+          <div className="flex justify-end"><Button onClick={apply} disabled={!message}>Send application</Button></div>
+        </div>
+      )}
     </article>
   );
 }
