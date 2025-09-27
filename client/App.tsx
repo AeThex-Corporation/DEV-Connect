@@ -37,7 +37,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile" element={<MyProfileRedirect />} />
                 <Route path="/profiles" element={<Profiles />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/u/:stackUserId" element={<ProfileView />} />
