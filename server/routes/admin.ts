@@ -133,4 +133,31 @@ router.patch("/tickets/:id", requireAdmin, async (req, res) => {
   res.json(rows[0] ?? null);
 });
 
+// Verification management
+router.get("/profiles/:stackUserId", requireAdmin, async (req, res) => {
+  const { stackUserId } = req.params as { stackUserId: string };
+  const rows = await query(
+    `SELECT id, stack_user_id, display_name, role, is_verified FROM profiles WHERE stack_user_id=$1 LIMIT 1`,
+    [stackUserId],
+  );
+  res.json(rows[0] ?? null);
+});
+
+router.patch(
+  "/profiles/:stackUserId/verify",
+  requireAdmin,
+  async (req, res) => {
+    const { stackUserId } = req.params as { stackUserId: string };
+    const { is_verified } = req.body ?? {};
+    if (typeof is_verified !== "boolean")
+      return res.status(400).json({ error: "is_verified boolean required" });
+    const rows = await query(
+      `UPDATE profiles SET is_verified=$1, updated_at=now() WHERE stack_user_id=$2
+       RETURNING id, stack_user_id, display_name, role, is_verified, updated_at`,
+      [is_verified, stackUserId],
+    );
+    res.json(rows[0] ?? null);
+  },
+);
+
 export default router;
