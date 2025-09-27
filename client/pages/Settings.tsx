@@ -16,6 +16,10 @@ export default function SettingsPage() {
     "dashboard" | "appearance" | "profile" | "security"
   >("dashboard");
   const [incoming, setIncoming] = useState<any[]>([]);
+  const [jobsCount, setJobsCount] = useState(0);
+  const [myApplicationsCount, setMyApplicationsCount] = useState(0);
+  const [favoritesCount, setFavoritesCount] = useState(0);
+  const [onlineNow, setOnlineNow] = useState(0);
   const [pwd, setPwd] = useState({ current: "", next: "" });
 
   useEffect(() => {
@@ -47,6 +51,18 @@ export default function SettingsPage() {
     fetch(`/api/applications/incoming?owner=${encodeURIComponent(sid)}`)
       .then((r) => r.json())
       .then(setIncoming);
+    fetch(`/api/jobs/mine/count?owner=${encodeURIComponent(sid)}`)
+      .then((r) => r.json())
+      .then((d) => setJobsCount(d.count || 0));
+    fetch(`/api/applications/mine/count?applicant=${encodeURIComponent(sid)}`)
+      .then((r) => r.json())
+      .then((d) => setMyApplicationsCount(d.count || 0));
+    fetch(`/api/favorites?stack_user_id=${encodeURIComponent(sid)}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((arr) => setFavoritesCount(Array.isArray(arr) ? arr.length : 0));
+    fetch(`/api/presence/online`)
+      .then((r) => r.json())
+      .then((d) => setOnlineNow(d.online || 0));
   }, [user]);
 
   const save = async () => {
@@ -325,9 +341,21 @@ export default function SettingsPage() {
         <section className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Dashboard</h2>
           <div className="mt-2 text-sm text-muted-foreground">
-            Quick links and recent activity
+            Command center: your stats and activity
           </div>
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricCard label="Profile completion" value={(() => {
+              const filled = [form?.display_name, form?.role, (form?.tags||[]).length ? "x" : null].filter(Boolean).length;
+              const pct = Math.round((filled / 3) * 100);
+              return `${pct}%`;
+            })()} />
+            <MetricCard label="My jobs" value={jobsCount.toLocaleString()} />
+            <MetricCard label="Incoming applications" value={incoming.length.toLocaleString()} />
+            <MetricCard label="Applications sent" value={myApplicationsCount.toLocaleString()} />
+            <MetricCard label="Favorites" value={favoritesCount.toLocaleString()} />
+            <MetricCard label="Online now" value={onlineNow.toLocaleString()} />
+          </div>
+          <div className="mt-5 flex gap-2">
             <Button asChild>
               <a href="/jobs">Post a job</a>
             </Button>
@@ -335,6 +363,9 @@ export default function SettingsPage() {
               <a href={`/u/${encodeURIComponent(user?.id || "")}`}>
                 View profile
               </a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="/messages">Open messages</a>
             </Button>
           </div>
           <div className="mt-6">
@@ -352,6 +383,23 @@ export default function SettingsPage() {
           </div>
         </section>
       )}
+
+      <section className="rounded-xl border bg-card p-5">
+        <h2 className="font-semibold">Account</h2>
+        <div className="mt-2 text-sm text-muted-foreground">
+          Signed in as: {user?.displayName || user?.id || "—"}
+        </div>
+        <div className="mt-3 flex gap-2">
+          <Button asChild variant="outline">
+            <a href={`/u/${encodeURIComponent(user?.id || "")}`}>
+              View profile
+            </a>
+          </Button>
+          <Button variant="destructive" onClick={signout}>
+            Sign out
+          </Button>
+        </div>
+      </section>
 
       {tab === "security" && (
         <section className="rounded-xl border bg-card p-5">
@@ -410,6 +458,15 @@ export default function SettingsPage() {
           </Button>
         </div>
       </section>
+    </div>
+  );
+}
+
+function MetricCard({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-lg border bg-muted/40 p-4">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 text-2xl font-semibold">{String(value)}</div>
     </div>
   );
 }
