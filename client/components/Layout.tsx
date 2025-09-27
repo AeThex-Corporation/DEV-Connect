@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Briefcase, Home, Sparkles } from "lucide-react";
 import { UserStatus } from "./UserStatus";
+import { useUser } from "@/lib/fake-stack";
 
 export function Layout() {
   return (
@@ -18,6 +19,7 @@ export function Layout() {
 
 function SiteHeader() {
   const location = useLocation();
+  const user = useUser();
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -51,12 +53,14 @@ function SiteHeader() {
         </nav>
         <div className="flex items-center gap-2">
           <UserStatus />
-          <Link
-            to="/settings"
-            className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground"
-          >
-            Settings
-          </Link>
+          {user && (
+            <Link
+              to="/settings"
+              className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground"
+            >
+              Settings
+            </Link>
+          )}
           <Button
             asChild
             className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90"
