@@ -42,7 +42,7 @@ export default function Onboarding() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-    nav(`/u/${encodeURIComponent(form.stack_user_id)}`);
+    nav(`/settings?tab=dashboard`);
   };
 
   return (
