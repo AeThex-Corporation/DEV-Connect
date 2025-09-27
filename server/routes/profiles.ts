@@ -6,7 +6,7 @@ export const getMyProfile: RequestHandler = async (req, res) => {
   if (!stackUserId)
     return res.status(400).json({ error: "stackUserId required" });
   const rows = await query(
-    `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
+    `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
     [stackUserId],
   );
   res.json(rows[0] ?? null);
@@ -17,7 +17,7 @@ export const getPublicProfile: RequestHandler = async (req, res) => {
   if (!stackUserId)
     return res.status(400).json({ error: "stackUserId required" });
   const rows = await query(
-    `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
+    `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
     [stackUserId],
   );
   if (!rows[0]) return res.status(404).json({ error: "Not found" });
@@ -25,7 +25,7 @@ export const getPublicProfile: RequestHandler = async (req, res) => {
 };
 
 export const listProfiles: RequestHandler = async (req, res) => {
-  const { q, role } = req.query as Record<string, string | undefined>;
+  const { q, role, availability, tags } = req.query as Record<string, string | undefined>;
   const clauses: string[] = [];
   const params: any[] = [];
   if (q) {
@@ -42,9 +42,20 @@ export const listProfiles: RequestHandler = async (req, res) => {
     params.push(role);
     clauses.push("role = $" + params.length);
   }
+  if (availability) {
+    params.push(availability);
+    clauses.push("availability = $" + params.length);
+  }
+  if (tags) {
+    const arr = tags.split(",").map((t) => t.trim()).filter(Boolean);
+    if (arr.length) {
+      params.push(arr);
+      clauses.push("tags && $" + params.length);
+    }
+  }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   const rows = await query(
-    `SELECT id, stack_user_id, display_name, role, tags, availability, trust_score, created_at FROM profiles ${where} ORDER BY created_at DESC LIMIT 100`,
+    `SELECT id, stack_user_id, display_name, role, tags, availability, trust_score, avatar_url, created_at FROM profiles ${where} ORDER BY created_at DESC LIMIT 100`,
     params,
   );
   res.json(rows);
@@ -62,14 +73,16 @@ export const upsertProfile: RequestHandler = async (req, res) => {
     availability,
     portfolio,
     trust_score,
+    avatar_url,
+    banner_url,
   } = req.body ?? {};
 
   if (!stack_user_id)
     return res.status(400).json({ error: "stack_user_id required" });
 
   const rows = await query(
-    `INSERT INTO profiles (stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, portfolio, trust_score, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,COALESCE($9,'[]'::jsonb),COALESCE($10,0), now())
+    `INSERT INTO profiles (stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, portfolio, trust_score, avatar_url, banner_url, updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,COALESCE($9,'[]'::jsonb),COALESCE($10,0),$11,$12, now())
      ON CONFLICT (stack_user_id) DO UPDATE SET
        display_name = EXCLUDED.display_name,
        role = EXCLUDED.role,
@@ -80,8 +93,10 @@ export const upsertProfile: RequestHandler = async (req, res) => {
        availability = EXCLUDED.availability,
        portfolio = EXCLUDED.portfolio,
        trust_score = EXCLUDED.trust_score,
+       avatar_url = EXCLUDED.avatar_url,
+       banner_url = EXCLUDED.banner_url,
        updated_at = now()
-     RETURNING id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, created_at, updated_at`,
+     RETURNING id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, created_at, updated_at`,
     [
       stack_user_id,
       display_name ?? null,
@@ -93,6 +108,8 @@ export const upsertProfile: RequestHandler = async (req, res) => {
       availability ?? null,
       portfolio ?? null,
       typeof trust_score === "number" ? trust_score : null,
+      avatar_url ?? null,
+      banner_url ?? null,
     ],
   );
 
