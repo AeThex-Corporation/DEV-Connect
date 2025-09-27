@@ -494,7 +494,9 @@ export function createServer() {
 
   // Presence
   app.post("/api/presence/ping", async (req, res) => {
-    const { stack_user_id } = req.body ?? {};
+    // Accept stack_user_id in body or query to support sendBeacon and GET fallbacks
+    const body = req.body ?? {};
+    const stack_user_id = String(body.stack_user_id || req.query.stack_user_id || "");
     if (!stack_user_id)
       return res.status(400).json({ error: "stack_user_id required" });
     const supabase = getSupabase();
@@ -508,6 +510,23 @@ export function createServer() {
     if (error) return res.status(500).json({ error: error.message });
     res.json({ ok: true });
   });
+
+  // Support GET pings for simple clients
+  app.get("/api/presence/ping", async (req, res) => {
+    const stack_user_id = String(req.query.stack_user_id || "");
+    if (!stack_user_id)
+      return res.status(400).json({ error: "stack_user_id required" });
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from("presence")
+      .upsert(
+        { stack_user_id, updated_at: new Date().toISOString() },
+        { onConflict: "stack_user_id" },
+      );
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ ok: true });
+  });
+
   app.get("/api/presence/online", async (_req, res) => {
     const supabase = getSupabase();
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
