@@ -496,7 +496,9 @@ export function createServer() {
   app.post("/api/presence/ping", async (req, res) => {
     // Accept stack_user_id in body or query to support sendBeacon and GET fallbacks
     const body = req.body ?? {};
-    const stack_user_id = String(body.stack_user_id || req.query.stack_user_id || "");
+    const stack_user_id = String(
+      body.stack_user_id || req.query.stack_user_id || "",
+    );
     if (!stack_user_id)
       return res.status(400).json({ error: "stack_user_id required" });
     const supabase = getSupabase();

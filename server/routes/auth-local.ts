@@ -11,16 +11,14 @@ async function tieAndMergeAccount(
 ) {
   const supabase = getSupabase();
   // Ensure a profile exists for this user id and email
-  await supabase
-    .from("profiles")
-    .upsert(
-      {
-        stack_user_id: id,
-        email,
-        display_name: displayName ?? email.split("@")[0],
-      },
-      { onConflict: "stack_user_id" },
-    );
+  await supabase.from("profiles").upsert(
+    {
+      stack_user_id: id,
+      email,
+      display_name: displayName ?? email.split("@")[0],
+    },
+    { onConflict: "stack_user_id" },
+  );
   // If other profiles exist with the same email but different stack_user_id, merge ALL into the new id
   const { data: others } = await supabase
     .from("profiles")
@@ -32,7 +30,10 @@ async function tieAndMergeAccount(
     const oldId = other?.stack_user_id;
     if (!oldId || oldId === id) continue;
     // Repoint references to new id (best-effort merges)
-    await supabase.from("jobs").update({ created_by: id }).eq("created_by", oldId);
+    await supabase
+      .from("jobs")
+      .update({ created_by: id })
+      .eq("created_by", oldId);
     await supabase
       .from("applications")
       .update({ applicant_stack_user_id: id })
@@ -45,14 +46,26 @@ async function tieAndMergeAccount(
       .from("messages")
       .update({ recipient_stack_user_id: id })
       .eq("recipient_stack_user_id", oldId);
-    await supabase.from("favorites").update({ stack_user_id: id }).eq("stack_user_id", oldId);
+    await supabase
+      .from("favorites")
+      .update({ stack_user_id: id })
+      .eq("stack_user_id", oldId);
     await supabase
       .from("favorites")
       .update({ favorite_stack_user_id: id })
       .eq("favorite_stack_user_id", oldId);
-    await supabase.from("presence").update({ stack_user_id: id }).eq("stack_user_id", oldId);
-    await supabase.from("tickets").update({ stack_user_id: id }).eq("stack_user_id", oldId);
-    await supabase.from("featured_devs").update({ stack_user_id: id }).eq("stack_user_id", oldId);
+    await supabase
+      .from("presence")
+      .update({ stack_user_id: id })
+      .eq("stack_user_id", oldId);
+    await supabase
+      .from("tickets")
+      .update({ stack_user_id: id })
+      .eq("stack_user_id", oldId);
+    await supabase
+      .from("featured_devs")
+      .update({ stack_user_id: id })
+      .eq("stack_user_id", oldId);
     // Move the profile to the new id
     if (other?.id) {
       await supabase
