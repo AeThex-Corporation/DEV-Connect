@@ -54,7 +54,7 @@ export default function ProfilesPage() {
   }, []);
 
   return (
-    <div>
+    <div className="animate-page-fade">
       {!user && (
         <div className="rounded-xl border bg-card p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
@@ -133,7 +133,18 @@ export default function ProfilesPage() {
         </div>
       </div>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((p) => (
+        {loading && (
+          <>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-xl border bg-card p-5">
+                <div className="h-4 w-32 skeleton" />
+                <div className="mt-2 h-3 w-24 skeleton" />
+                <div className="mt-4 h-6 w-full skeleton" />
+              </div>
+            ))}
+          </>
+        )}
+        {!loading && items.map((p) => (
           <article
             key={p.stack_user_id}
             className="rounded-xl border bg-card p-5"
