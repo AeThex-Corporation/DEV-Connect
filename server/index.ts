@@ -565,7 +565,7 @@ export function createServer() {
       )
       .eq("status", "completed")
       .or(
-        `applicant_stack_user_id.eq.${stackUserId},jobs.created_by.eq.${stackUserId}`,
+        `applicant_stack_user_id.eq."${stackUserId.replace(/"/g, '""')}",jobs_created_by.eq."${stackUserId.replace(/"/g, '""')}"`,
       )
       .order("completed_at", { ascending: false, nullsFirst: false })
       .limit(50);
