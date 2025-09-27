@@ -357,8 +357,10 @@ export default function SettingsPage() {
         <section className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Security</h2>
           <div className="mt-2 text-sm text-muted-foreground">
-            Change your password (local accounts)
+            Your unique Passport ID verifies ownership of this account.
           </div>
+          <PassportBlock userId={user?.id || ""} />
+          <div className="mt-6 text-sm text-muted-foreground">Change your password (local accounts)</div>
           <div className="mt-3 grid sm:grid-cols-2 gap-3">
             <label className="grid gap-1 text-sm">
               <span className="text-muted-foreground">Current password</span>
