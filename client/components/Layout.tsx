@@ -126,9 +126,9 @@ function SiteFooter() {
         <div>
           <h4 className="font-semibold mb-3">Safety</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>Verification & ratings</li>
-            <li>Moderation & reporting</li>
-            <li>Contract templates</li>
+            <li><Link to="/safety/verification">Verification & ratings</Link></li>
+            <li><Link to="/safety/moderation">Moderation & reporting</Link></li>
+            <li><Link to="/safety/contracts">Contract templates</Link></li>
           </ul>
         </div>
         <div>
