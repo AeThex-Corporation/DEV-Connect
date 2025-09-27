@@ -14,9 +14,37 @@ import { listFavorites, toggleFavorite } from "./routes/favorites";
 import { submitReport } from "./routes/reports";
 import authRouter from "./auth";
 import { signup, login } from "./routes/auth-local";
+import { query } from "./db";
+
+async function ensureSchema() {
+  await query(
+    `CREATE TABLE IF NOT EXISTS profiles (
+      id SERIAL PRIMARY KEY,
+      stack_user_id TEXT UNIQUE NOT NULL,
+      display_name TEXT,
+      role TEXT,
+      tags TEXT[],
+      contact_discord TEXT,
+      contact_roblox TEXT,
+      contact_twitter TEXT,
+      availability TEXT,
+      trust_score INTEGER,
+      portfolio JSONB,
+      avatar_url TEXT,
+      banner_url TEXT,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT`);
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_url TEXT`);
+}
 
 export function createServer() {
   const app = express();
+
+  // Ensure DB schema on cold start
+  ensureSchema().catch(() => {});
 
   // Middleware
   app.use(cors());
