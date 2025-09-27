@@ -47,8 +47,8 @@ function HeroSection() {
           >
             <Link to="/jobs">Browse jobs</Link>
           </Button>
-          <Button size="lg" variant="outline">
-            Create your profile
+          <Button asChild size="lg" variant="outline">
+            <Link to="/onboarding">Create your profile</Link>
           </Button>
         </div>
       </div>
