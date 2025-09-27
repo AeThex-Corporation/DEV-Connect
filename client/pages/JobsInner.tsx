@@ -108,14 +108,15 @@ export default function JobsInner() {
               ))}
             </>
           )}
-          {!loading && filtered.map((j) => (
-            <JobCard
-              key={j.id}
-              job={j}
-              stackUserId={user?.id}
-              onApplied={load}
-            />
-          ))}
+          {!loading &&
+            filtered.map((j) => (
+              <JobCard
+                key={j.id}
+                job={j}
+                stackUserId={user?.id}
+                onApplied={load}
+              />
+            ))}
           {!filtered.length && !loading && (
             <div className="rounded-xl border bg-card p-6 text-center text-sm text-muted-foreground">
               No jobs found.

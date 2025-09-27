@@ -44,7 +44,10 @@ function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-bold text-lg text-foreground">
+        <Link
+          to="/"
+          className="flex items-center gap-2 font-bold text-lg text-foreground"
+        >
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-primary to-violet-500 text-primary-foreground">
             <Sparkles className="h-4 w-4" />
           </span>
@@ -163,17 +166,26 @@ function SiteFooter() {
           <h4 className="font-semibold mb-3">Platform</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <Link to="/jobs" className="text-foreground/80 hover:text-foreground">
+              <Link
+                to="/jobs"
+                className="text-foreground/80 hover:text-foreground"
+              >
                 Browse jobs
               </Link>
             </li>
             <li>
-              <Link to="/profiles" className="text-foreground/80 hover:text-foreground">
+              <Link
+                to="/profiles"
+                className="text-foreground/80 hover:text-foreground"
+              >
                 Network
               </Link>
             </li>
             <li>
-              <Link to="/messages" className="text-foreground/80 hover:text-foreground">
+              <Link
+                to="/messages"
+                className="text-foreground/80 hover:text-foreground"
+              >
                 Messages
               </Link>
             </li>

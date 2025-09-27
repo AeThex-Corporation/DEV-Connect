@@ -54,7 +54,9 @@ async function ensureSchema() {
   );
   await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT`);
   await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_url TEXT`);
-  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS passport_id TEXT UNIQUE`);
+  await query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS passport_id TEXT UNIQUE`,
+  );
 
   // Local users (email unique)
   await query(

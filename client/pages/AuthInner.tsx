@@ -40,9 +40,15 @@ export default function AuthInner() {
         <div className="grid md:grid-cols-2 rounded-2xl overflow-hidden border bg-card">
           <div className="hidden md:block bg-gradient-to-br from-primary/15 via-violet-500/10 to-indigo-500/10 p-8">
             <div className="h-full w-full rounded-xl border bg-background/50 p-6">
-              <div className="text-sm font-medium text-primary">RBX Connect</div>
-              <h2 className="mt-2 text-3xl font-extrabold tracking-tight">Welcome back</h2>
-              <p className="mt-2 text-sm text-muted-foreground">Snappy auth, secure accounts, and a modern experience.</p>
+              <div className="text-sm font-medium text-primary">
+                RBX Connect
+              </div>
+              <h2 className="mt-2 text-3xl font-extrabold tracking-tight">
+                Welcome back
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Snappy auth, secure accounts, and a modern experience.
+              </p>
               <ul className="mt-6 space-y-2 text-sm text-muted-foreground list-disc list-inside">
                 <li>Unique Passport ID to verify ownership</li>
                 <li>Fast onboarding to your dashboard</li>
@@ -67,7 +73,9 @@ export default function AuthInner() {
               </button>
             </div>
             <h1 className="text-2xl font-bold">
-              {mode === "signup" ? "Create your account" : "Sign in to RBX Connect"}
+              {mode === "signup"
+                ? "Create your account"
+                : "Sign in to RBX Connect"}
             </h1>
             <form onSubmit={submit} className="grid gap-3">
               {mode === "signup" && (
@@ -104,7 +112,12 @@ export default function AuthInner() {
                 />
               </label>
               {mode === "signin" && (
-                <a href="/auth/forgot" className="text-xs underline text-muted-foreground">Forgot password?</a>
+                <a
+                  href="/auth/forgot"
+                  className="text-xs underline text-muted-foreground"
+                >
+                  Forgot password?
+                </a>
               )}
               {error && <div className="text-sm text-red-600">{error}</div>}
               <button
@@ -112,7 +125,11 @@ export default function AuthInner() {
                 type="submit"
                 disabled={loading}
               >
-                {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
+                {loading
+                  ? "Please wait…"
+                  : mode === "signup"
+                    ? "Create account"
+                    : "Sign in"}
               </button>
             </form>
           </div>

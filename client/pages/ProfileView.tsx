@@ -136,7 +136,8 @@ export default function ProfileView() {
             Availability: {p.availability ?? "—"}
           </div>
           <div className="mt-3 text-xs text-muted-foreground">
-            Passport ID: <span className="font-mono select-all">{p.passport_id || "—"}</span>
+            Passport ID:{" "}
+            <span className="font-mono select-all">{p.passport_id || "—"}</span>
           </div>
         </section>
         <section className="rounded-xl border bg-card p-5">

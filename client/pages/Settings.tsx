@@ -360,7 +360,9 @@ export default function SettingsPage() {
             Your unique Passport ID verifies ownership of this account.
           </div>
           <PassportBlock userId={user?.id || ""} />
-          <div className="mt-6 text-sm text-muted-foreground">Change your password (local accounts)</div>
+          <div className="mt-6 text-sm text-muted-foreground">
+            Change your password (local accounts)
+          </div>
           <div className="mt-3 grid sm:grid-cols-2 gap-3">
             <label className="grid gap-1 text-sm">
               <span className="text-muted-foreground">Current password</span>
@@ -451,10 +453,14 @@ function PassportBlock({ userId }: { userId: string }) {
     <div className="mt-3 flex items-center justify-between rounded-lg border bg-muted/40 p-3">
       <div className="text-sm">
         <div className="text-muted-foreground">Passport ID</div>
-        <div className="font-mono text-sm select-all">{pid ?? "Not claimed"}</div>
+        <div className="font-mono text-sm select-all">
+          {pid ?? "Not claimed"}
+        </div>
       </div>
       {!pid && (
-        <Button onClick={claim} disabled={loading}>{loading ? "Claiming..." : "Claim"}</Button>
+        <Button onClick={claim} disabled={loading}>
+          {loading ? "Claiming..." : "Claim"}
+        </Button>
       )}
       {pid && (
         <Button

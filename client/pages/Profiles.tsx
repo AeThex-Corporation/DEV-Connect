@@ -144,47 +144,48 @@ export default function ProfilesPage() {
             ))}
           </>
         )}
-        {!loading && items.map((p) => (
-          <article
-            key={p.stack_user_id}
-            className="rounded-xl border bg-card p-5"
-          >
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold overflow-hidden">
-                {p.avatar_url ? (
-                  <img
-                    src={p.avatar_url}
-                    alt={p.display_name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  (p.display_name || "U").charAt(0).toUpperCase()
-                )}
+        {!loading &&
+          items.map((p) => (
+            <article
+              key={p.stack_user_id}
+              className="rounded-xl border bg-card p-5"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold overflow-hidden">
+                  {p.avatar_url ? (
+                    <img
+                      src={p.avatar_url}
+                      alt={p.display_name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    (p.display_name || "U").charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-semibold">{p.display_name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {p.role || "Developer"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold">{p.display_name}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {p.role || "Developer"}
-                </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(p.tags || []).slice(0, 4).map((t) => (
+                  <span
+                    key={t}
+                    className="text-xs rounded-md px-2 py-1 bg-muted text-muted-foreground"
+                  >
+                    {t}
+                  </span>
+                ))}
               </div>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {(p.tags || []).slice(0, 4).map((t) => (
-                <span
-                  key={t}
-                  className="text-xs rounded-md px-2 py-1 bg-muted text-muted-foreground"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-            <Button asChild variant="outline" className="mt-4">
-              <Link to={`/u/${encodeURIComponent(p.stack_user_id)}`}>
-                View profile
-              </Link>
-            </Button>
-          </article>
-        ))}
+              <Button asChild variant="outline" className="mt-4">
+                <Link to={`/u/${encodeURIComponent(p.stack_user_id)}`}>
+                  View profile
+                </Link>
+              </Button>
+            </article>
+          ))}
       </div>
     </div>
   );

@@ -4,7 +4,8 @@ import crypto from "crypto";
 
 export const getPassport: RequestHandler = async (req, res) => {
   const { stackUserId } = req.params as { stackUserId: string };
-  if (!stackUserId) return res.status(400).json({ error: "stackUserId required" });
+  if (!stackUserId)
+    return res.status(400).json({ error: "stackUserId required" });
   const rows = await query<{ passport_id: string }>(
     `SELECT passport_id FROM profiles WHERE stack_user_id=$1`,
     [stackUserId],
