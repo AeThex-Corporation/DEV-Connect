@@ -34,7 +34,7 @@ export default function JobsInner() {
   const filtered = useMemo(() => jobs, [jobs]);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[280px,1fr]">
+    <div className="grid gap-6 lg:grid-cols-[280px,1fr] animate-page-fade">
       <aside className="rounded-xl border bg-card p-4 h-fit">
         <div className="flex items-center gap-2 font-semibold">
           <Filter className="h-4 w-4" /> Filters
