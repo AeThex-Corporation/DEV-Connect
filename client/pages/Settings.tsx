@@ -29,6 +29,8 @@ export default function SettingsPage() {
           availability: data?.availability ?? "Open to Work",
           portfolio: data?.portfolio ?? [],
           trust_score: data?.trust_score ?? 0,
+          avatar_url: data?.avatar_url ?? "",
+          banner_url: data?.banner_url ?? "",
         });
       })
       .finally(() => setLoading(false));
@@ -93,85 +95,150 @@ export default function SettingsPage() {
             {loading ? "Loading..." : "Sign in to edit your profile."}
           </div>
         ) : (
-          <div className="mt-3 grid gap-3">
-            <Field label="Display name">
-              <input
-                className="w-full rounded-md border bg-background px-3 py-2"
-                value={form.display_name ?? ""}
-                onChange={(e) =>
-                  setForm({ ...form, display_name: e.target.value })
-                }
+          <div className="mt-3 grid gap-4">
+            <div className="relative rounded-lg border overflow-hidden">
+              <div
+                className="h-32 sm:h-40 w-full bg-muted"
+                style={{
+                  backgroundImage: form.banner_url ? `url(${form.banner_url})` : undefined,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
               />
-            </Field>
-            <Field label="Role">
-              <input
-                className="w-full rounded-md border bg-background px-3 py-2"
-                value={form.role ?? ""}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
-                placeholder="Scripter, Builder, Designer..."
-              />
-            </Field>
-            <Field label="Tags (comma separated)">
-              <input
-                className="w-full rounded-md border bg-background px-3 py-2"
-                value={(form.tags ?? []).join(", ")}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    tags: e.target.value
-                      .split(",")
-                      .map((s: string) => s.trim())
-                      .filter(Boolean),
-                  })
-                }
-              />
-            </Field>
-            <div className="grid sm:grid-cols-3 gap-3">
-              <Field label="Discord">
-                <input
-                  className="w-full rounded-md border bg-background px-3 py-2"
-                  value={form.contact_discord ?? ""}
-                  onChange={(e) =>
-                    setForm({ ...form, contact_discord: e.target.value })
-                  }
-                />
-              </Field>
-              <Field label="Roblox ID">
-                <input
-                  className="w-full rounded-md border bg-background px-3 py-2"
-                  value={form.contact_roblox ?? ""}
-                  onChange={(e) =>
-                    setForm({ ...form, contact_roblox: e.target.value })
-                  }
-                />
-              </Field>
-              <Field label="Twitter">
-                <input
-                  className="w-full rounded-md border bg-background px-3 py-2"
-                  value={form.contact_twitter ?? ""}
-                  onChange={(e) =>
-                    setForm({ ...form, contact_twitter: e.target.value })
-                  }
-                />
-              </Field>
+              <div className="absolute left-4 -bottom-8 flex items-end gap-4">
+                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full ring-2 ring-background overflow-hidden bg-primary/10 text-primary flex items-center justify-center text-xl font-bold">
+                  {form.avatar_url ? (
+                    <img src={form.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                  ) : (
+                    (form.display_name || "U").charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div className="hidden sm:block pb-2">
+                  <div className="font-semibold">{form.display_name || user?.displayName || ""}</div>
+                  <div className="text-xs text-muted-foreground">{form.role || "Developer"}</div>
+                </div>
+              </div>
+              <div className="absolute right-3 top-3 flex gap-2">
+                <label className="inline-flex">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (!f) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setForm({ ...form, banner_url: String(reader.result) });
+                      reader.readAsDataURL(f);
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                  <Button asChild variant="secondary" size="sm">
+                    <span>Upload banner</span>
+                  </Button>
+                </label>
+              </div>
+              <div className="absolute left-24 bottom-2 sm:left-28 sm:bottom-3">
+                <label className="inline-flex">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (!f) return;
+                      const reader = new FileReader();
+                      reader.onload = () => setForm({ ...form, avatar_url: String(reader.result) });
+                      reader.readAsDataURL(f);
+                      e.currentTarget.value = "";
+                    }}
+                  />
+                  <Button asChild variant="outline" size="sm">
+                    <span>Upload avatar</span>
+                  </Button>
+                </label>
+              </div>
             </div>
-            <Field label="Availability">
-              <select
-                className="w-full rounded-md border bg-background px-3 py-2"
-                value={form.availability ?? "Open to Work"}
-                onChange={(e) =>
-                  setForm({ ...form, availability: e.target.value })
-                }
-              >
-                <option>Open to Work</option>
-                <option>Only Networking</option>
-                <option>Unavailable</option>
-              </select>
-            </Field>
-            <div className="flex justify-end">
-              <Button onClick={save} disabled={loading}>
-                {loading ? "Saving..." : "Save"}
-              </Button>
+            <div className="mt-10 grid gap-3">
+              <Field label="Display name">
+                <input
+                  className="w-full rounded-md border bg-background px-3 py-2"
+                  value={form.display_name ?? ""}
+                  onChange={(e) =>
+                    setForm({ ...form, display_name: e.target.value })
+                  }
+                />
+              </Field>
+              <Field label="Role">
+                <input
+                  className="w-full rounded-md border bg-background px-3 py-2"
+                  value={form.role ?? ""}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  placeholder="Scripter, Builder, Designer..."
+                />
+              </Field>
+              <Field label="Tags (comma separated)">
+                <input
+                  className="w-full rounded-md border bg-background px-3 py-2"
+                  value={(form.tags ?? []).join(", ")}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      tags: e.target.value
+                        .split(",")
+                        .map((s: string) => s.trim())
+                        .filter(Boolean),
+                    })
+                  }
+                />
+              </Field>
+              <div className="grid sm:grid-cols-3 gap-3">
+                <Field label="Discord">
+                  <input
+                    className="w-full rounded-md border bg-background px-3 py-2"
+                    value={form.contact_discord ?? ""}
+                    onChange={(e) =>
+                      setForm({ ...form, contact_discord: e.target.value })
+                    }
+                  />
+                </Field>
+                <Field label="Roblox ID">
+                  <input
+                    className="w-full rounded-md border bg-background px-3 py-2"
+                    value={form.contact_roblox ?? ""}
+                    onChange={(e) =>
+                      setForm({ ...form, contact_roblox: e.target.value })
+                    }
+                  />
+                </Field>
+                <Field label="Twitter">
+                  <input
+                    className="w-full rounded-md border bg-background px-3 py-2"
+                    value={form.contact_twitter ?? ""}
+                    onChange={(e) =>
+                      setForm({ ...form, contact_twitter: e.target.value })
+                    }
+                  />
+                </Field>
+              </div>
+              <Field label="Availability">
+                <select
+                  className="w-full rounded-md border bg-background px-3 py-2"
+                  value={form.availability ?? "Open to Work"}
+                  onChange={(e) =>
+                    setForm({ ...form, availability: e.target.value })
+                  }
+                >
+                  <option>Open to Work</option>
+                  <option>Only Networking</option>
+                  <option>Unavailable</option>
+                </select>
+              </Field>
+              <div className="flex justify-end">
+                <Button onClick={save} disabled={loading}>
+                  {loading ? "Saving..." : "Save"}
+                </Button>
+              </div>
             </div>
           </div>
         )}
