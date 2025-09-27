@@ -41,6 +41,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/success" element={<AuthSuccess />} />
                 <Route path="/profile" element={<MyProfileRedirect />} />
                 <Route path="/profiles" element={<Profiles />} />
                 <Route path="/favorites" element={<Favorites />} />
