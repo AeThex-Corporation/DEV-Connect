@@ -104,7 +104,7 @@ export const upsertProfile: RequestHandler = async (req, res) => {
        avatar_url = EXCLUDED.avatar_url,
        banner_url = EXCLUDED.banner_url,
        updated_at = now()
-     RETURNING id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, created_at, updated_at`,
+     RETURNING id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, passport_id, is_verified, created_at, updated_at`,
     [
       stack_user_id,
       email ?? null,
