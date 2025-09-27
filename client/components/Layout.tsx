@@ -32,10 +32,22 @@ function SiteHeader() {
         setIncomingCount(0);
         return;
       }
+
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        // Avoid noisy fetch attempts when offline
+        setIncomingCount(0);
+        return;
+      }
+
       try {
+        // Use AbortController to avoid long-hanging fetches
+        const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const id = controller ? setTimeout(() => controller.abort(), 8000) : null;
         const r = await safeFetch(
           `/api/applications/incoming/count?owner=${encodeURIComponent(user.id)}`,
+          controller ? { signal: controller.signal } : undefined,
         );
+        if (id) clearTimeout(id);
         if (!r) {
           // safeFetch returned null due to network or fetch not available
           setIncomingCount(0);
