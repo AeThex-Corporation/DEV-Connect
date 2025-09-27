@@ -1,24 +1,36 @@
 import { RequestHandler } from "express";
-import { query } from "../db";
+import type { RequestHandler } from "express";
+import { getSupabase } from "../supabase";
 
 export const listFeaturedDevs: RequestHandler = async (_req, res) => {
-  const rows = await query(
-    `SELECT p.stack_user_id, p.display_name, p.role, p.tags, p.avatar_url, p.availability
-     FROM featured_devs fd
-     JOIN profiles p ON p.stack_user_id = fd.stack_user_id
-     ORDER BY fd.created_at DESC
-     LIMIT 12`,
-  );
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("featured_devs")
+    .select(
+      "created_at, profiles:stack_user_id(stack_user_id, display_name, role, tags, avatar_url, availability)",
+    )
+    .order("created_at", { ascending: false })
+    .limit(12);
+  if (error) return res.status(500).json({ error: error.message });
+  const rows = (data || []).map((r: any) => ({
+    stack_user_id: r.profiles?.stack_user_id,
+    display_name: r.profiles?.display_name,
+    role: r.profiles?.role,
+    tags: r.profiles?.tags,
+    avatar_url: r.profiles?.avatar_url,
+    availability: r.profiles?.availability,
+  }));
   res.json(rows);
 };
 
 export const listFeaturedJobs: RequestHandler = async (_req, res) => {
-  const rows = await query(
-    `SELECT j.id, j.title, j.role, j.comp, j.genre, j.scope, j.description, j.created_by, j.created_at
-     FROM featured_jobs fj
-     JOIN jobs j ON j.id = fj.job_id
-     ORDER BY fj.created_at DESC
-     LIMIT 9`,
-  );
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from("featured_jobs")
+    .select("created_at, jobs:job_id(id, title, role, comp, genre, scope, description, created_by, created_at)")
+    .order("created_at", { ascending: false })
+    .limit(9);
+  if (error) return res.status(500).json({ error: error.message });
+  const rows = (data || []).map((r: any) => ({ ...r.jobs }));
   res.json(rows);
 };
