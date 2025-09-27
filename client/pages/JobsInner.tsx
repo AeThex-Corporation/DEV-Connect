@@ -98,7 +98,17 @@ export default function JobsInner() {
         {user && <CreateJob onCreated={load} stackUserId={user.id} />}
 
         <div className="mt-4 grid gap-4">
-          {filtered.map((j) => (
+          {loading && (
+            <>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="rounded-xl border bg-card p-5">
+                  <div className="h-5 w-40 skeleton" />
+                  <div className="mt-3 h-4 w-full skeleton" />
+                </div>
+              ))}
+            </>
+          )}
+          {!loading && filtered.map((j) => (
             <JobCard
               key={j.id}
               job={j}
