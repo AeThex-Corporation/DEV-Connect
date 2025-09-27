@@ -7,11 +7,14 @@ export function getSupabase(): SupabaseClient {
 
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   if (!url) {
-    throw new Error("Supabase is not configured. Set SUPABASE_URL or VITE_SUPABASE_URL env var.");
+    throw new Error(
+      "Supabase is not configured. Set SUPABASE_URL or VITE_SUPABASE_URL env var.",
+    );
   }
 
   const serviceRole = process.env.SUPABASE_SERVICE_ROLE;
-  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const anonKey =
+    process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
   const key = serviceRole || anonKey;
   if (!key) {

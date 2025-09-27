@@ -31,7 +31,8 @@ export const claimPassport: RequestHandler = async (req, res) => {
     .limit(1)
     .maybeSingle();
   if (gErr) return res.status(500).json({ error: gErr.message });
-  if (existing?.passport_id) return res.json({ passport_id: existing.passport_id });
+  if (existing?.passport_id)
+    return res.json({ passport_id: existing.passport_id });
   // Generate if missing and update
   const token = `rbx_${crypto.randomBytes(6).toString("hex")}`;
   const { data, error } = await supabase

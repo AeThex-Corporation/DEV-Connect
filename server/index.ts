@@ -254,9 +254,17 @@ export function createServer() {
   // Optional auto-migration from Neon to Supabase
   (async () => {
     try {
-      if (process.env.SUPABASE_URL && process.env.DATABASE_URL && process.env.AUTO_MIGRATE === "1") {
+      if (
+        process.env.SUPABASE_URL &&
+        process.env.DATABASE_URL &&
+        process.env.AUTO_MIGRATE === "1"
+      ) {
         const supabase = getSupabase();
-        async function copy(table: string, selectSql: string, onConflict?: string) {
+        async function copy(
+          table: string,
+          selectSql: string,
+          onConflict?: string,
+        ) {
           const rows = await query<any>(selectSql);
           if (!rows.length) return;
           const chunkSize = 500;
@@ -273,11 +281,27 @@ export function createServer() {
         await copy("jobs", "SELECT * FROM jobs", "id");
         await copy("applications", "SELECT * FROM applications", "id");
         await copy("messages", "SELECT * FROM messages", "id");
-        await copy("favorites", "SELECT * FROM favorites", "stack_user_id,favorite_stack_user_id");
+        await copy(
+          "favorites",
+          "SELECT * FROM favorites",
+          "stack_user_id,favorite_stack_user_id",
+        );
         await copy("reports", "SELECT * FROM reports", "id");
-        await copy("featured_devs", "SELECT * FROM featured_devs", "stack_user_id");
-        await copy("profile_badges", "SELECT * FROM profile_badges", "stack_user_id,slug");
-        await copy("ratings", "SELECT * FROM ratings", "rater_stack_user_id,ratee_stack_user_id");
+        await copy(
+          "featured_devs",
+          "SELECT * FROM featured_devs",
+          "stack_user_id",
+        );
+        await copy(
+          "profile_badges",
+          "SELECT * FROM profile_badges",
+          "stack_user_id,slug",
+        );
+        await copy(
+          "ratings",
+          "SELECT * FROM ratings",
+          "rater_stack_user_id,ratee_stack_user_id",
+        );
         await copy("featured_jobs", "SELECT * FROM featured_jobs", "job_id");
         await copy("tickets", "SELECT * FROM tickets", "id");
         await copy("password_resets", "SELECT * FROM password_resets", "token");
@@ -364,7 +388,9 @@ export function createServer() {
         },
         { onConflict: "rater_stack_user_id,ratee_stack_user_id" },
       )
-      .select("id, rater_stack_user_id, ratee_stack_user_id, score, comment, created_at")
+      .select(
+        "id, rater_stack_user_id, ratee_stack_user_id, score, comment, created_at",
+      )
       .limit(1)
       .maybeSingle();
     if (error) return res.status(500).json({ error: error.message });
@@ -433,12 +459,15 @@ export function createServer() {
     if (!apps) return res.status(404).json({ error: "not found" });
     if (!owner || apps.jobs?.created_by !== owner)
       return res.status(403).json({ error: "forbidden" });
-    const completed_at = status === "completed" ? new Date().toISOString() : null;
+    const completed_at =
+      status === "completed" ? new Date().toISOString() : null;
     const { data, error } = await supabase
       .from("applications")
       .update({ status, completed_at })
       .eq("id", Number(id))
-      .select("id, job_id, applicant_stack_user_id, message, status, created_at, completed_at")
+      .select(
+        "id, job_id, applicant_stack_user_id, message, status, created_at, completed_at",
+      )
       .limit(1)
       .maybeSingle();
     if (error) return res.status(500).json({ error: error.message });
@@ -472,7 +501,10 @@ export function createServer() {
     // Upsert by unique stack_user_id
     const { error } = await supabase
       .from("presence")
-      .upsert({ stack_user_id, updated_at: new Date().toISOString() }, { onConflict: "stack_user_id" });
+      .upsert(
+        { stack_user_id, updated_at: new Date().toISOString() },
+        { onConflict: "stack_user_id" },
+      );
     if (error) return res.status(500).json({ error: error.message });
     res.json({ ok: true });
   });
@@ -507,9 +539,13 @@ export function createServer() {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from("applications")
-      .select("id, job_id, status, completed_at, applicant_stack_user_id, jobs:job_id(title, created_by)")
+      .select(
+        "id, job_id, status, completed_at, applicant_stack_user_id, jobs:job_id(title, created_by)",
+      )
       .eq("status", "completed")
-      .or(`applicant_stack_user_id.eq.${stackUserId},jobs.created_by.eq.${stackUserId}`)
+      .or(
+        `applicant_stack_user_id.eq.${stackUserId},jobs.created_by.eq.${stackUserId}`,
+      )
       .order("completed_at", { ascending: false, nullsFirst: false })
       .limit(50);
     if (error) return res.status(500).json({ error: error.message });
@@ -540,9 +576,7 @@ export function createServer() {
         supabase
           .from("applications")
           .select("id", { count: "exact", head: true }),
-        supabase
-          .from("messages")
-          .select("id", { count: "exact", head: true }),
+        supabase.from("messages").select("id", { count: "exact", head: true }),
         supabase
           .from("presence")
           .select("id", { count: "exact", head: true })

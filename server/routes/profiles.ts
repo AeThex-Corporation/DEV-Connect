@@ -38,7 +38,10 @@ export const getPublicProfile: RequestHandler = async (req, res) => {
 };
 
 export const listProfiles: RequestHandler = async (req, res) => {
-  const { q, role, availability, tags } = req.query as Record<string, string | undefined>;
+  const { q, role, availability, tags } = req.query as Record<
+    string,
+    string | undefined
+  >;
   const supabase = getSupabase();
   let qb = supabase
     .from("profiles")

@@ -11,10 +11,16 @@ async function tieAndMergeAccount(
 ) {
   const supabase = getSupabase();
   // Ensure a profile exists for this user id and email
-  await supabase.from("profiles").upsert(
-    { stack_user_id: id, email, display_name: displayName ?? email.split("@")[0] },
-    { onConflict: "stack_user_id" },
-  );
+  await supabase
+    .from("profiles")
+    .upsert(
+      {
+        stack_user_id: id,
+        email,
+        display_name: displayName ?? email.split("@")[0],
+      },
+      { onConflict: "stack_user_id" },
+    );
   // If another profile exists with the same email but different stack_user_id, merge it into the new id
   const { data: other } = await supabase
     .from("profiles")
@@ -26,7 +32,10 @@ async function tieAndMergeAccount(
   const oldId = other?.stack_user_id;
   if (oldId && oldId !== id) {
     // Repoint references to new id (best-effort merges)
-    await supabase.from("jobs").update({ created_by: id }).eq("created_by", oldId);
+    await supabase
+      .from("jobs")
+      .update({ created_by: id })
+      .eq("created_by", oldId);
     await supabase
       .from("applications")
       .update({ applicant_stack_user_id: id })
@@ -39,13 +48,22 @@ async function tieAndMergeAccount(
       .from("messages")
       .update({ recipient_stack_user_id: id })
       .eq("recipient_stack_user_id", oldId);
-    await supabase.from("favorites").update({ stack_user_id: id }).eq("stack_user_id", oldId);
+    await supabase
+      .from("favorites")
+      .update({ stack_user_id: id })
+      .eq("stack_user_id", oldId);
     await supabase
       .from("favorites")
       .update({ favorite_stack_user_id: id })
       .eq("favorite_stack_user_id", oldId);
-    await supabase.from("presence").update({ stack_user_id: id }).eq("stack_user_id", oldId);
-    await supabase.from("tickets").update({ stack_user_id: id }).eq("stack_user_id", oldId);
+    await supabase
+      .from("presence")
+      .update({ stack_user_id: id })
+      .eq("stack_user_id", oldId);
+    await supabase
+      .from("tickets")
+      .update({ stack_user_id: id })
+      .eq("stack_user_id", oldId);
     await supabase
       .from("featured_devs")
       .update({ stack_user_id: id })
@@ -71,7 +89,8 @@ export const signup: RequestHandler = async (req, res) => {
     .eq("email", email)
     .limit(1)
     .maybeSingle();
-  if (existing) return res.status(409).json({ error: "email already registered" });
+  if (existing)
+    return res.status(409).json({ error: "email already registered" });
   const hash = await bcrypt.hash(password, 10);
   const { error } = await supabase
     .from("users_local")

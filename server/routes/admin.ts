@@ -75,7 +75,9 @@ router.get("/featured/jobs", requireAdmin, async (_req, res) => {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("featured_jobs")
-    .select("job_id, created_at, jobs:job_id(id, title, role, comp, genre, scope, description, created_by, created_at)")
+    .select(
+      "job_id, created_at, jobs:job_id(id, title, role, comp, genre, scope, description, created_by, created_at)",
+    )
     .order("created_at", { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json((data || []).map((r: any) => r.jobs));
@@ -98,7 +100,10 @@ router.post("/featured/jobs", requireAdmin, async (req, res) => {
 router.delete("/featured/jobs/:jobId", requireAdmin, async (req, res) => {
   const { jobId } = req.params as { jobId: string };
   const supabase = getSupabase();
-  const { error } = await supabase.from("featured_jobs").delete().eq("job_id", Number(jobId));
+  const { error } = await supabase
+    .from("featured_jobs")
+    .delete()
+    .eq("job_id", Number(jobId));
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true });
 });
@@ -259,7 +264,13 @@ router.post("/badges", requireAdmin, async (req, res) => {
   const { data, error } = await supabase
     .from("profile_badges")
     .upsert(
-      { stack_user_id, slug, label: label ?? null, icon: icon ?? null, color: color ?? null },
+      {
+        stack_user_id,
+        slug,
+        label: label ?? null,
+        icon: icon ?? null,
+        color: color ?? null,
+      },
       { onConflict: "stack_user_id,slug" },
     )
     .select("id, stack_user_id, slug, label, icon, color, created_at")
@@ -304,20 +315,56 @@ router.post("/migrate/neon-to-supabase", requireAdmin, async (_req, res) => {
   }
   try {
     const results = [] as any[];
-    results.push(await copy("profiles", "SELECT * FROM profiles", "stack_user_id"));
-    results.push(await copy("users_local", "SELECT * FROM users_local", "email"));
+    results.push(
+      await copy("profiles", "SELECT * FROM profiles", "stack_user_id"),
+    );
+    results.push(
+      await copy("users_local", "SELECT * FROM users_local", "email"),
+    );
     results.push(await copy("jobs", "SELECT * FROM jobs", "id"));
-    results.push(await copy("applications", "SELECT * FROM applications", "id"));
+    results.push(
+      await copy("applications", "SELECT * FROM applications", "id"),
+    );
     results.push(await copy("messages", "SELECT * FROM messages", "id"));
-    results.push(await copy("favorites", "SELECT * FROM favorites", "stack_user_id,favorite_stack_user_id"));
+    results.push(
+      await copy(
+        "favorites",
+        "SELECT * FROM favorites",
+        "stack_user_id,favorite_stack_user_id",
+      ),
+    );
     results.push(await copy("reports", "SELECT * FROM reports", "id"));
-    results.push(await copy("featured_devs", "SELECT * FROM featured_devs", "stack_user_id"));
-    results.push(await copy("profile_badges", "SELECT * FROM profile_badges", "stack_user_id,slug"));
-    results.push(await copy("ratings", "SELECT * FROM ratings", "rater_stack_user_id,ratee_stack_user_id"));
-    results.push(await copy("featured_jobs", "SELECT * FROM featured_jobs", "job_id"));
+    results.push(
+      await copy(
+        "featured_devs",
+        "SELECT * FROM featured_devs",
+        "stack_user_id",
+      ),
+    );
+    results.push(
+      await copy(
+        "profile_badges",
+        "SELECT * FROM profile_badges",
+        "stack_user_id,slug",
+      ),
+    );
+    results.push(
+      await copy(
+        "ratings",
+        "SELECT * FROM ratings",
+        "rater_stack_user_id,ratee_stack_user_id",
+      ),
+    );
+    results.push(
+      await copy("featured_jobs", "SELECT * FROM featured_jobs", "job_id"),
+    );
     results.push(await copy("tickets", "SELECT * FROM tickets", "id"));
-    results.push(await copy("password_resets", "SELECT * FROM password_resets", "token"));
-    results.push(await copy("presence", "SELECT * FROM presence", "stack_user_id"));
+    results.push(
+      await copy("password_resets", "SELECT * FROM password_resets", "token"),
+    );
+    results.push(
+      await copy("presence", "SELECT * FROM presence", "stack_user_id"),
+    );
     res.json({ ok: true, results });
   } catch (e: any) {
     res.status(500).json({ error: e.message });

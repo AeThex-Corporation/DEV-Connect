@@ -42,7 +42,10 @@ export const toggleFavorite: RequestHandler = async (req, res) => {
   if (findErr && findErr.code !== "PGRST116")
     return res.status(500).json({ error: findErr.message });
   if (existing) {
-    const { error } = await supabase.from("favorites").delete().eq("id", existing.id);
+    const { error } = await supabase
+      .from("favorites")
+      .delete()
+      .eq("id", existing.id);
     if (error) return res.status(500).json({ error: error.message });
     return res.json({ favorited: false });
   }

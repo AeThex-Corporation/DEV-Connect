@@ -18,9 +18,7 @@ export const listFeaturedDevs: RequestHandler = async (_req, res) => {
     .in("stack_user_id", ids);
   if (pErr) return res.status(500).json({ error: pErr.message });
   const map = new Map((profiles || []).map((p: any) => [p.stack_user_id, p]));
-  const rows = ids
-    .map((id) => map.get(id))
-    .filter(Boolean);
+  const rows = ids.map((id) => map.get(id)).filter(Boolean);
   res.json(rows);
 };
 
@@ -28,7 +26,9 @@ export const listFeaturedJobs: RequestHandler = async (_req, res) => {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("featured_jobs")
-    .select("created_at, jobs:job_id(id, title, role, comp, genre, scope, description, created_by, created_at)")
+    .select(
+      "created_at, jobs:job_id(id, title, role, comp, genre, scope, description, created_by, created_at)",
+    )
     .order("created_at", { ascending: false })
     .limit(9);
   if (error) return res.status(500).json({ error: error.message });
