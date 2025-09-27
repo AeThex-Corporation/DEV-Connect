@@ -31,6 +31,29 @@ import { ThemeProvider } from "@/lib/theme";
 
 const queryClient = new QueryClient();
 
+// Global handlers to reduce noisy uncaught promise logs from third-party wrappers
+if (typeof window !== "undefined") {
+  window.addEventListener("unhandledrejection", (ev: PromiseRejectionEvent) => {
+    try {
+      // log and prevent default console spam
+      // eslint-disable-next-line no-console
+      console.warn("Unhandled promise rejection captured:", ev.reason);
+      ev.preventDefault?.();
+    } catch (e) {
+      /* no-op */
+    }
+  });
+  window.addEventListener("error", (ev) => {
+    try {
+      // Surface errors but avoid noisy duplicates
+      // eslint-disable-next-line no-console
+      console.warn("Window error captured:", ev.error || ev.message);
+    } catch (e) {
+      /* no-op */
+    }
+  });
+}
+
 const App = () => (
   <ThemeProvider>
     <FakeStackProvider>
