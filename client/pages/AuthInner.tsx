@@ -77,6 +77,9 @@ export default function AuthInner() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            {mode === "signin" && (
+              <a href="/auth/forgot" className="text-xs underline text-muted-foreground">Forgot password?</a>
+            )}
             {error && <div className="text-sm text-red-600">{error}</div>}
             <button
               className="rounded-md bg-primary text-primary-foreground px-4 py-2"
