@@ -50,7 +50,10 @@ export function UserButton() {
   if (!user) return null;
   return (
     <div className="flex items-center gap-2">
-      <button className="text-sm" onClick={() => nav("/profile")}>
+      <button
+        className="text-sm"
+        onClick={() => nav(`/u/${encodeURIComponent(user.id)}`)}
+      >
         {user.displayName ?? user.id}
       </button>
       <button
