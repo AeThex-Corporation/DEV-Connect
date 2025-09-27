@@ -144,6 +144,33 @@ async function ensureSchema() {
       created_at TIMESTAMPTZ DEFAULT now()
     )`,
   );
+
+  // Profile badges
+  await query(
+    `CREATE TABLE IF NOT EXISTS profile_badges (
+      id SERIAL PRIMARY KEY,
+      stack_user_id TEXT NOT NULL,
+      slug TEXT NOT NULL,
+      label TEXT,
+      icon TEXT,
+      color TEXT,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      UNIQUE (stack_user_id, slug)
+    )`,
+  );
+
+  // Ratings
+  await query(
+    `CREATE TABLE IF NOT EXISTS ratings (
+      id SERIAL PRIMARY KEY,
+      rater_stack_user_id TEXT NOT NULL,
+      ratee_stack_user_id TEXT NOT NULL,
+      score INTEGER NOT NULL CHECK (score >= 1 AND score <= 5),
+      comment TEXT,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      UNIQUE (rater_stack_user_id, ratee_stack_user_id)
+    )`,
+  );
   await query(
     `CREATE TABLE IF NOT EXISTS featured_jobs (
       id SERIAL PRIMARY KEY,
@@ -212,6 +239,47 @@ export function createServer() {
 
   // Admin routes
   app.use("/api/admin", adminRouter);
+
+  // Public badges API
+  app.get("/api/badges/:stackUserId", async (req, res) => {
+    const { stackUserId } = req.params as { stackUserId: string };
+    const rows = await query(
+      `SELECT id, stack_user_id, slug, label, icon, color, created_at
+       FROM profile_badges WHERE stack_user_id=$1 ORDER BY created_at DESC`,
+      [stackUserId],
+    );
+    res.json(rows);
+  });
+
+  // Public ratings API
+  app.get("/api/ratings/:stackUserId", async (req, res) => {
+    const { stackUserId } = req.params as { stackUserId: string };
+    const rows = await query<{ avg: string; count: string }>(
+      `SELECT COALESCE(AVG(score),0)::text as avg, COUNT(*)::text as count
+       FROM ratings WHERE ratee_stack_user_id=$1`,
+      [stackUserId],
+    );
+    res.json({
+      average: Number(rows[0]?.avg || 0),
+      count: Number(rows[0]?.count || 0),
+    });
+  });
+
+  app.post("/api/ratings", async (req, res) => {
+    const { rater_stack_user_id, ratee_stack_user_id, score, comment } =
+      req.body ?? {};
+    if (!rater_stack_user_id || !ratee_stack_user_id || !score)
+      return res.status(400).json({ error: "rater, ratee and score required" });
+    const rows = await query(
+      `INSERT INTO ratings (rater_stack_user_id, ratee_stack_user_id, score, comment)
+       VALUES ($1,$2,$3,$4)
+       ON CONFLICT (rater_stack_user_id, ratee_stack_user_id)
+       DO UPDATE SET score=EXCLUDED.score, comment=EXCLUDED.comment, created_at=now()
+       RETURNING id, rater_stack_user_id, ratee_stack_user_id, score, comment, created_at`,
+      [rater_stack_user_id, ratee_stack_user_id, score, comment ?? null],
+    );
+    res.status(201).json(rows[0]);
+  });
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {

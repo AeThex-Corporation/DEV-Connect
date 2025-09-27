@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSupabase } from "./supabase";
+import { Badge } from "@/components/ui/badge";
+import { BadgeCheck, Crown, Shield } from "lucide-react";
 
 type User = { id: string; displayName?: string } | null;
 
@@ -64,6 +66,19 @@ export function useAuth() {
 export function UserButton() {
   const { user, signout } = useContext(AuthContext);
   const nav = useNavigate();
+  const [status, setStatus] = useState<{ is_admin: boolean; is_owner: boolean } | null>(null);
+  const [verified, setVerified] = useState<boolean>(false);
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch("/api/admin/me", { headers: { "x-user-id": user.id } })
+      .then((r) => r.json())
+      .then((d) => setStatus(d))
+      .catch(() => setStatus(null));
+    fetch(`/api/profile/me?stackUserId=${encodeURIComponent(user.id)}`)
+      .then((r) => r.json())
+      .then((p) => setVerified(Boolean(p?.is_verified)))
+      .catch(() => setVerified(false));
+  }, [user?.id]);
   if (!user) return null;
   return (
     <div className="flex items-center gap-2">
@@ -73,6 +88,21 @@ export function UserButton() {
       >
         {user.displayName ?? user.id}
       </button>
+      {verified && (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <BadgeCheck className="h-3 w-3 text-primary" /> Verified
+        </Badge>
+      )}
+      {status?.is_owner && (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Crown className="h-3 w-3 text-yellow-500" /> Owner
+        </Badge>
+      )}
+      {!status?.is_owner && status?.is_admin && (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Shield className="h-3 w-3 text-blue-500" /> Admin
+        </Badge>
+      )}
       <button
         className="text-sm text-muted-foreground"
         onClick={() => {

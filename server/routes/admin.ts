@@ -82,6 +82,32 @@ router.delete("/featured/jobs/:jobId", requireAdmin, async (req, res) => {
   res.json({ ok: true });
 });
 
+// Admin status (no requireAdmin; reports user status from header)
+router.get("/me", async (req, res) => {
+  const id = req.header("x-user-id") || undefined;
+  const adminEnv = (process.env.ADMIN_IDS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const ownerEnv = (process.env.OWNER_IDS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const isAdminDirect = id ? adminEnv.includes(id) : false;
+  const isOwnerDirect = id ? ownerEnv.includes(id) : false;
+  const localEmail = id && id.startsWith("local:") ? id.slice(6) : undefined;
+  const is_admin = Boolean(
+    isAdminDirect || (localEmail ? adminEnv.includes(localEmail) : false),
+  );
+  const is_owner = Boolean(
+    isOwnerDirect || (localEmail ? ownerEnv.includes(localEmail) : false) ||
+      (!ownerEnv.length && // fallback: first admin is owner if none specified
+        adminEnv.length > 0 &&
+        ((id && adminEnv[0] === id) || (localEmail && adminEnv[0] === localEmail))),
+  );
+  res.json({ is_admin, is_owner });
+});
+
 // Reports moderation
 router.get("/reports", requireAdmin, async (_req, res) => {
   const rows = await query(
@@ -157,6 +183,50 @@ router.patch(
       [is_verified, stackUserId],
     );
     res.json(rows[0] ?? null);
+  },
+);
+
+// Badge management
+router.get("/badges", requireAdmin, async (req, res) => {
+  const stack_user_id = String(req.query.stack_user_id || "");
+  const rows = await query(
+    `SELECT id, stack_user_id, slug, label, icon, color, created_at
+     FROM profile_badges
+     ${stack_user_id ? "WHERE stack_user_id=$1" : ""}
+     ORDER BY created_at DESC`,
+    stack_user_id ? [stack_user_id] : [],
+  );
+  res.json(rows);
+});
+
+router.post("/badges", requireAdmin, async (req, res) => {
+  const { stack_user_id, slug, label, icon, color } = req.body ?? {};
+  if (!stack_user_id || !slug)
+    return res.status(400).json({ error: "stack_user_id and slug required" });
+  const rows = await query(
+    `INSERT INTO profile_badges (stack_user_id, slug, label, icon, color)
+     VALUES ($1,$2,$3,$4,$5)
+     ON CONFLICT (stack_user_id, slug)
+     DO UPDATE SET label=EXCLUDED.label, icon=EXCLUDED.icon, color=EXCLUDED.color, created_at=now()
+     RETURNING id, stack_user_id, slug, label, icon, color, created_at`,
+    [stack_user_id, slug, label ?? null, icon ?? null, color ?? null],
+  );
+  res.json(rows[0] ?? null);
+});
+
+router.delete(
+  "/badges/:stackUserId/:slug",
+  requireAdmin,
+  async (req, res) => {
+    const { stackUserId, slug } = req.params as {
+      stackUserId: string;
+      slug: string;
+    };
+    await query(
+      `DELETE FROM profile_badges WHERE stack_user_id=$1 AND slug=$2`,
+      [stackUserId, slug],
+    );
+    res.json({ ok: true });
   },
 );
 
