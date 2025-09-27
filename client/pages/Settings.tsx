@@ -426,3 +426,44 @@ function Field({
     </label>
   );
 }
+
+function PassportBlock({ userId }: { userId: string }) {
+  const [pid, setPid] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`/api/passport/${encodeURIComponent(userId)}`)
+      .then((r) => r.json())
+      .then((d) => setPid(d.passport_id ?? null));
+  }, [userId]);
+  const claim = async () => {
+    setLoading(true);
+    const r = await fetch(`/api/passport/claim`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stack_user_id: userId }),
+    });
+    const d = await r.json();
+    setPid(d.passport_id);
+    setLoading(false);
+  };
+  return (
+    <div className="mt-3 flex items-center justify-between rounded-lg border bg-muted/40 p-3">
+      <div className="text-sm">
+        <div className="text-muted-foreground">Passport ID</div>
+        <div className="font-mono text-sm select-all">{pid ?? "Not claimed"}</div>
+      </div>
+      {!pid && (
+        <Button onClick={claim} disabled={loading}>{loading ? "Claiming..." : "Claim"}</Button>
+      )}
+      {pid && (
+        <Button
+          variant="outline"
+          onClick={() => navigator.clipboard.writeText(pid)}
+        >
+          Copy
+        </Button>
+      )}
+    </div>
+  );
+}
