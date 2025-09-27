@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
-import { query } from "../db";
+import type { RequestHandler } from "express";
+import { getSupabase } from "../supabase";
 
 export const submitReport: RequestHandler = async (req, res) => {
   const { subject, description } = req.body ?? {};
