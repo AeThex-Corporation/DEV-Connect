@@ -163,15 +163,29 @@ function SiteFooter() {
       try {
         if (user?.id) {
           try {
-            const resp = await safeFetch(`/api/presence/ping`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ stack_user_id: user.id }),
-            });
-            if (!resp) {
-              console.warn("Presence ping failed: no response from fetch");
-            } else if (!resp.ok) {
-              console.warn("Presence ping failed", resp.status);
+            // Prefer sendBeacon for lightweight background pings when available
+            if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+              try {
+                // sendBeacon sends a POST; provide stack_user_id as query so server can accept it
+                const url = `/api/presence/ping?stack_user_id=${encodeURIComponent(user.id)}`;
+                navigator.sendBeacon(url);
+              } catch (sbErr) {
+                // fall back to fetch if sendBeacon fails
+                await safeFetch(`/api/presence/ping?stack_user_id=${encodeURIComponent(user.id)}`);
+              }
+            } else if (typeof navigator !== "undefined" && !navigator.onLine) {
+              // offline: skip
+            } else {
+              const resp = await safeFetch(`/api/presence/ping`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stack_user_id: user.id }),
+              });
+              if (!resp) {
+                console.warn("Presence ping failed: no response from fetch");
+              } else if (!resp.ok) {
+                console.warn("Presence ping failed", resp.status);
+              }
             }
           } catch (err) {
             // Network or other error when sending presence ping
@@ -179,7 +193,14 @@ function SiteFooter() {
           }
         }
         try {
-          const r = await safeFetch(`/api/presence/online`);
+          if (typeof navigator !== "undefined" && !navigator.onLine) {
+            setOnline(0);
+            return;
+          }
+          const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+          const idc = controller ? setTimeout(() => controller.abort(), 8000) : null;
+          const r = await safeFetch(`/api/presence/online`, controller ? { signal: controller.signal } : undefined);
+          if (idc) clearTimeout(idc);
           if (!r) {
             console.warn("Failed to fetch online count (no response)");
             setOnline(0);
