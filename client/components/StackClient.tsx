@@ -26,6 +26,10 @@ export function StackClient({ children }: { children: React.ReactNode }) {
     (import.meta as any).env.VITE_STACK_PUBLISHABLE_CLIENT_KEY ||
     (import.meta as any).env.NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY;
 
+  if (!projectId || !publishableClientKey) {
+    return <>{children}</>;
+  }
+
   return (
     <StackProvider
       projectId={projectId}
