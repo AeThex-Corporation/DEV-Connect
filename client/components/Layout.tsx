@@ -36,6 +36,12 @@ function SiteHeader() {
             Home
           </NavItem>
           <NavItem
+            to="/profiles"
+            active={location.pathname.startsWith("/profiles")}
+          >
+            Network
+          </NavItem>
+          <NavItem
             to="/jobs"
             icon={<Briefcase className="h-4 w-4" />}
             active={location.pathname.startsWith("/jobs")}
@@ -117,8 +123,8 @@ function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link to="/profile" className="hover:text-foreground">
-                Your profile
+              <Link to="/profiles" className="hover:text-foreground">
+                Network
               </Link>
             </li>
             <li>
