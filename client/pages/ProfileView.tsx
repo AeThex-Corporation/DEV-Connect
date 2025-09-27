@@ -32,7 +32,18 @@ export default function ProfileView() {
       .finally(() => setLoading(false));
   }, [stackUserId]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className="animate-page-fade mx-auto max-w-4xl">
+        <div className="rounded-2xl border bg-card overflow-hidden">
+          <div className="h-40 skeleton" />
+          <div className="p-6">
+            <div className="h-8 w-40 skeleton" />
+            <div className="mt-2 h-4 w-24 skeleton" />
+          </div>
+        </div>
+      </div>
+    );
   if (!p)
     return (
       <div className="text-sm text-muted-foreground">Profile not found.</div>
@@ -59,7 +70,7 @@ export default function ProfileView() {
 
   const initial = (p.display_name || "U").charAt(0).toUpperCase();
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl animate-page-fade">
       <section className="rounded-2xl border bg-card overflow-hidden">
         <div
           className="h-32 sm:h-40 w-full bg-muted"
