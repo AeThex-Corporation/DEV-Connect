@@ -27,6 +27,7 @@ export default function ProfileView() {
   const [p, setP] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [rating, setRating] = useState<{ average: number; count: number }>({ average: 0, count: 0 });
+  const [badges, setBadges] = useState<Array<{ slug: string; label?: string; icon?: string; color?: string }>>([]);
 
   useEffect(() => {
     if (!stackUserId) return;
@@ -47,6 +48,11 @@ export default function ProfileView() {
           const rr = await fetch(`/api/ratings/${encodeURIComponent(stackUserId)}`);
           const rv = await rr.json();
           setRating({ average: Number(rv.average || 0), count: Number(rv.count || 0) });
+        } catch (e) {}
+        try {
+          const br = await fetch(`/api/badges/${encodeURIComponent(stackUserId)}`);
+          const bl = await br.json();
+          setBadges(Array.isArray(bl) ? bl : []);
         } catch (e) {}
       } catch (err) {
         console.warn("Error loading public profile", err);
@@ -189,6 +195,20 @@ export default function ProfileView() {
             <li>Roblox ID: {p.contact_roblox || "—"}</li>
             <li>Twitter: {p.contact_twitter || "—"}</li>
           </ul>
+        </section>
+        <section className="rounded-xl border bg-card p-5">
+          <h2 className="font-semibold">Badges</h2>
+          {badges.length === 0 ? (
+            <div className="mt-2 text-sm text-muted-foreground">No badges yet.</div>
+          ) : (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {badges.map((b) => (
+                <Badge key={b.slug} variant="secondary">
+                  {b.label || b.slug}
+                </Badge>
+              ))}
+            </div>
+          )}
         </section>
         <section className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Rate this profile</h2>
