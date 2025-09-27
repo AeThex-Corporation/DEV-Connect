@@ -5,7 +5,7 @@ import { apiGet, apiPost, Message } from "@/services/api";
 
 export default function MessagesInner() {
   const user = useUser();
-  const [peer, setPeer] = useState("");
+  const [peer, setPeer] = useState(() => new URLSearchParams(window.location.search).get("peer") || "");
   const [messages, setMessages] = useState<Message[]>([]);
   const [body, setBody] = useState("");
 
