@@ -17,6 +17,7 @@ import {
 } from "./routes/jobs";
 import { listThread, sendMessage } from "./routes/messages";
 import { listFavorites, toggleFavorite } from "./routes/favorites";
+import { claimPassport, getPassport } from "./routes/passport";
 import { submitReport } from "./routes/reports";
 import authRouter from "./auth";
 import {
@@ -53,6 +54,7 @@ async function ensureSchema() {
   );
   await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT`);
   await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS banner_url TEXT`);
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS passport_id TEXT UNIQUE`);
 
   // Local users (email unique)
   await query(
@@ -197,6 +199,10 @@ export function createServer() {
   app.get("/api/profiles", listProfiles);
   app.get("/api/profile/:stackUserId", getPublicProfile);
   app.post("/api/profile", upsertProfile);
+
+  // Passport
+  app.get("/api/passport/:stackUserId", getPassport);
+  app.post("/api/passport/claim", claimPassport);
 
   // Jobs
   app.get("/api/jobs", listJobs);
