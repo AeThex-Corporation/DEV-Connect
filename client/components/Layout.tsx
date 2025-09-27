@@ -1,7 +1,8 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MessageSquare, Briefcase, Home, Sparkles } from "lucide-react";
+import { Briefcase, Home, Sparkles } from "lucide-react";
+import { UserButton, useUser } from "@stackframe/stack";
 
 export function Layout() {
   return (
@@ -17,6 +18,7 @@ export function Layout() {
 
 function SiteHeader() {
   const location = useLocation();
+  const user = useUser();
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -33,8 +35,15 @@ function SiteHeader() {
             active={location.pathname.startsWith("/jobs")}>Jobs</NavItem>
         </nav>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" className="hidden sm:inline-flex">Sign in</Button>
-          <Button className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90">Post a job</Button>
+          {user ? (
+            <>
+              <Link to="/profile" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground">Profile</Link>
+              <UserButton />
+            </>
+          ) : (
+            <Button asChild variant="ghost" className="hidden sm:inline-flex"><Link to="/auth">Sign in</Link></Button>
+          )}
+          <Button asChild className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90"><Link to="/jobs">Post a job</Link></Button>
         </div>
       </div>
     </header>
@@ -77,7 +86,7 @@ function SiteFooter() {
           <h4 className="font-semibold mb-3">Platform</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/jobs" className="hover:text-foreground">Browse jobs</Link></li>
-            <li><span className="cursor-default select-none">Profiles (soon)</span></li>
+            <li><Link to="/profile" className="hover:text-foreground">Your profile</Link></li>
             <li><span className="cursor-default select-none">Messages (soon)</span></li>
           </ul>
         </div>
