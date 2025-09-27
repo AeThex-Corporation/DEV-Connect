@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { query } from "../db";
 
 export const listJobs: RequestHandler = async (req, res) => {
-  const { role, comp, genre, q, created_by } = req.query as Record<
+  const { role, comp, genre, q, created_by, exclude_revshare } = req.query as Record<
     string,
     string | undefined
   >;
@@ -17,8 +17,11 @@ export const listJobs: RequestHandler = async (req, res) => {
     clauses.push(`role = $${params.length}`);
   }
   if (comp) {
-    params.push(comp);
-    clauses.push(`comp = $${params.length}`);
+    params.push(`%${comp.toLowerCase()}%`);
+    clauses.push(`LOWER(comp) LIKE $${params.length}`);
+  }
+  if (exclude_revshare === "1") {
+    clauses.push(`LOWER(comp) NOT LIKE '%rev share%'`);
   }
   if (genre) {
     params.push(genre);
