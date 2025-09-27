@@ -11,6 +11,9 @@ import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import Profiles from "./pages/Profiles";
+import ProfileView from "./pages/ProfileView";
+import Onboarding from "./pages/Onboarding";
 import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
@@ -31,6 +34,9 @@ const App = () => (
               <Route path="/jobs" element={<Jobs />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/profiles" element={<Profiles />} />
+              <Route path="/u/:stackUserId" element={<ProfileView />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/messages" element={<Messages />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
