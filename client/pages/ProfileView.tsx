@@ -27,6 +27,7 @@ export default function ProfileView() {
   const [p, setP] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [rating, setRating] = useState<{ average: number; count: number }>({ average: 0, count: 0 });
+  const [history, setHistory] = useState<any[]>([]);
   const [badges, setBadges] = useState<Array<{ slug: string; label?: string; icon?: string; color?: string }>>([]);
 
   useEffect(() => {
