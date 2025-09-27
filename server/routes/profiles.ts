@@ -6,7 +6,7 @@ export const getMyProfile: RequestHandler = async (req, res) => {
   if (!stackUserId)
     return res.status(400).json({ error: "stackUserId required" });
   const rows = await query(
-    `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, passport_id, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
+    `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, passport_id, is_verified, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
     [stackUserId],
   );
   res.json(rows[0] ?? null);
@@ -17,7 +17,7 @@ export const getPublicProfile: RequestHandler = async (req, res) => {
   if (!stackUserId)
     return res.status(400).json({ error: "stackUserId required" });
   const rows = await query(
-    `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, passport_id, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
+    `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, passport_id, is_verified, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
     [stackUserId],
   );
   if (!rows[0]) return res.status(404).json({ error: "Not found" });
