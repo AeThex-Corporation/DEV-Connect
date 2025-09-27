@@ -11,7 +11,9 @@ export function Layout() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 text-foreground">
       <SiteHeader />
       <main className="container px-4 sm:px-6 lg:px-8 py-8">
-        <Outlet />
+        <div className="animate-page-fade">
+          <Outlet />
+        </div>
       </main>
       <SiteFooter />
     </div>
@@ -42,7 +44,7 @@ function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-bold text-lg">
+        <Link to="/" className="flex items-center gap-2 font-bold text-lg text-foreground">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-primary to-violet-500 text-primary-foreground">
             <Sparkles className="h-4 w-4" />
           </span>
