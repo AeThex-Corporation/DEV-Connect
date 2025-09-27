@@ -53,6 +53,31 @@ function HeroSection({
   user: ReturnType<typeof useUser>;
   incomplete: boolean;
 }) {
+  const [stats, setStats] = useState<{
+    profiles: number;
+    verifiedProfiles: number;
+    jobs: number;
+    applications: number;
+    messages: number;
+    online: number;
+  } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const r = await fetch("/api/stats");
+        if (!r.ok) throw new Error(String(r.status));
+        const d = await r.json();
+        if (alive) setStats(d);
+      } catch {
+        if (alive) setStats({ profiles: 0, verifiedProfiles: 0, jobs: 0, applications: 0, messages: 0, online: 0 });
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const nf = (n: number) => n.toLocaleString();
   return (
     <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/5 via-violet-500/10 to-indigo-500/5 p-8 sm:p-12">
       <div className="absolute inset-0 -z-10 [background:radial-gradient(1200px_circle_at_10%_10%,hsl(var(--primary)/0.15),transparent_40%),radial-gradient(900px_circle_at_90%_20%,rgba(124,58,237,.15),transparent_35%)]" />
@@ -98,17 +123,17 @@ function HeroSection({
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
         <Stat
           title="Verified talent"
-          value="1,200+"
+          value={nf(stats?.verifiedProfiles ?? 0)}
           icon={<BadgeCheck className="h-4 w-4 text-primary" />}
         />
         <Stat
           title="Active jobs"
-          value="340"
+          value={nf(stats?.jobs ?? 0)}
           icon={<Search className="h-4 w-4 text-primary" />}
         />
         <Stat
-          title="Avg. response"
-          value="< 24h"
+          title="Online now"
+          value={nf(stats?.online ?? 0)}
           icon={<Clock className="h-4 w-4 text-primary" />}
         />
       </div>
