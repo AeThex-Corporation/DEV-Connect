@@ -24,6 +24,8 @@ export function createServer() {
 
   // Profiles
   app.get("/api/profile/me", getMyProfile);
+  app.get("/api/profiles", listProfiles);
+  app.get("/api/profile/:stackUserId", getPublicProfile);
   app.post("/api/profile", upsertProfile);
 
   // Jobs
