@@ -21,10 +21,20 @@ export default function Index() {
         setProfile(null);
         return;
       }
-      const r = await fetch(
-        `/api/profile/me?stackUserId=${encodeURIComponent(user.id)}`,
-      );
-      setProfile(await r.json());
+      try {
+        const r = await fetch(
+          `/api/profile/me?stackUserId=${encodeURIComponent(user.id)}`,
+        );
+        if (!r.ok) {
+          console.warn("Failed to load profile", r.status);
+          setProfile(null);
+          return;
+        }
+        setProfile(await r.json());
+      } catch (err) {
+        console.warn("Error loading profile", err);
+        setProfile(null);
+      }
     })();
   }, [user]);
   const incomplete = useMemo(() => {
