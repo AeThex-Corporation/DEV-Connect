@@ -44,5 +44,8 @@ export function createServer() {
   app.get("/api/favorites", listFavorites);
   app.post("/api/favorites/toggle", toggleFavorite);
 
+  // Reports
+  app.post("/api/report", submitReport);
+
   return app;
 }
