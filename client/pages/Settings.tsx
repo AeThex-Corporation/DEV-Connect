@@ -30,7 +30,7 @@ export default function SettingsPage() {
     const sid = user.id;
     setLoading(true);
     fetch(`/api/profile/me?stackUserId=${encodeURIComponent(sid)}`)
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         setForm({
           stack_user_id: sid,
@@ -47,22 +47,30 @@ export default function SettingsPage() {
           banner_url: data?.banner_url ?? "",
         });
       })
+      .catch((err) => {
+        console.warn("Error loading profile in settings", err);
+      })
       .finally(() => setLoading(false));
     fetch(`/api/applications/incoming?owner=${encodeURIComponent(sid)}`)
-      .then((r) => r.json())
-      .then(setIncoming);
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setIncoming)
+      .catch((err) => console.warn("Error loading incoming applications", err));
     fetch(`/api/jobs/mine/count?owner=${encodeURIComponent(sid)}`)
-      .then((r) => r.json())
-      .then((d) => setJobsCount(d.count || 0));
+      .then((r) => (r.ok ? r.json() : { count: 0 }))
+      .then((d) => setJobsCount(d.count || 0))
+      .catch((err) => console.warn("Error fetching jobs count", err));
     fetch(`/api/applications/mine/count?applicant=${encodeURIComponent(sid)}`)
-      .then((r) => r.json())
-      .then((d) => setMyApplicationsCount(d.count || 0));
+      .then((r) => (r.ok ? r.json() : { count: 0 }))
+      .then((d) => setMyApplicationsCount(d.count || 0))
+      .catch((err) => console.warn("Error fetching my applications count", err));
     fetch(`/api/favorites?stack_user_id=${encodeURIComponent(sid)}`)
       .then((r) => (r.ok ? r.json() : []))
-      .then((arr) => setFavoritesCount(Array.isArray(arr) ? arr.length : 0));
+      .then((arr) => setFavoritesCount(Array.isArray(arr) ? arr.length : 0))
+      .catch((err) => console.warn("Error loading favorites", err));
     fetch(`/api/presence/online`)
-      .then((r) => r.json())
-      .then((d) => setOnlineNow(d.online || 0));
+      .then((r) => (r.ok ? r.json() : { online: 0 }))
+      .then((d) => setOnlineNow(d.online || 0))
+      .catch((err) => console.warn("Error fetching presence online", err));
   }, [user]);
 
   const save = async () => {
