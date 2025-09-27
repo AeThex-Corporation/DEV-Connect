@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { BadgeCheck, Star } from "lucide-react";
 
 interface PublicProfile {
   stack_user_id: string;
@@ -16,6 +18,7 @@ interface PublicProfile {
   avatar_url?: string;
   banner_url?: string;
   passport_id?: string;
+  is_verified?: boolean;
 }
 
 export default function ProfileView() {
@@ -23,6 +26,7 @@ export default function ProfileView() {
   const nav = useNavigate();
   const [p, setP] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(false);
+  const [rating, setRating] = useState<{ average: number; count: number }>({ average: 0, count: 0 });
 
   useEffect(() => {
     if (!stackUserId) return;
@@ -39,6 +43,11 @@ export default function ProfileView() {
         }
         const d = await r.json();
         setP(d);
+        try {
+          const rr = await fetch(`/api/ratings/${encodeURIComponent(stackUserId)}`);
+          const rv = await rr.json();
+          setRating({ average: Number(rv.average || 0), count: Number(rv.count || 0) });
+        } catch (e) {}
       } catch (err) {
         console.warn("Error loading public profile", err);
         setP(null);
@@ -116,10 +125,23 @@ export default function ProfileView() {
                 )}
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
+                <h1 className="text-2xl sm:text-3xl font-bold leading-tight flex items-center gap-2">
                   {p.display_name}
+                  {p.is_verified && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <BadgeCheck className="h-3 w-3 text-primary" /> Verified
+                    </Badge>
+                  )}
                 </h1>
-                <p className="text-muted-foreground">{p.role || "Developer"}</p>
+                <p className="text-muted-foreground flex items-center gap-2">
+                  {p.role || "Developer"}
+                  {rating.count > 0 && (
+                    <span className="inline-flex items-center gap-1 text-xs">
+                      <Star className="h-3 w-3 text-yellow-500" />
+                      {rating.average.toFixed(1)} ({rating.count})
+                    </span>
+                  )}
+                </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {tags.slice(0, 6).map((t) => (
                     <span
@@ -167,6 +189,39 @@ export default function ProfileView() {
             <li>Roblox ID: {p.contact_roblox || "—"}</li>
             <li>Twitter: {p.contact_twitter || "—"}</li>
           </ul>
+        </section>
+        <section className="rounded-xl border bg-card p-5">
+          <h2 className="font-semibold">Rate this profile</h2>
+          <div className="mt-2 flex items-center gap-1">
+            {[1,2,3,4,5].map((s) => (
+              <button
+                key={s}
+                className="p-2"
+                title={`Rate ${s}`}
+                onClick={async () => {
+                  try {
+                    const meRaw = localStorage.getItem("rbx_user");
+                    const me = meRaw ? JSON.parse(meRaw) : null;
+                    if (!me?.id) return;
+                    await fetch("/api/ratings", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        rater_stack_user_id: me.id,
+                        ratee_stack_user_id: p!.stack_user_id,
+                        score: s,
+                      }),
+                    });
+                    const rr = await fetch(`/api/ratings/${encodeURIComponent(p!.stack_user_id)}`);
+                    const rv = await rr.json();
+                    setRating({ average: Number(rv.average || 0), count: Number(rv.count || 0) });
+                  } catch (e) {}
+                }}
+              >
+                <Star className={`h-5 w-5 ${rating.average >= s ? "text-yellow-500" : "text-muted-foreground"}`} />
+              </button>
+            ))}
+          </div>
         </section>
       </div>
     </div>
