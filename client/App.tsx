@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/messages" element={<Messages />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Route>
