@@ -133,8 +133,8 @@ export default function SettingsPage() {
                       e.currentTarget.value = "";
                     }}
                   />
-                  <Button asChild variant="secondary" size="sm">
-                    <span>Upload banner</span>
+                  <Button variant="secondary" size="sm" type="button">
+                    Upload banner
                   </Button>
                 </label>
               </div>
