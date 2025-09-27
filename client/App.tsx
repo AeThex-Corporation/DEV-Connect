@@ -44,6 +44,7 @@ const App = () => (
                 <Route path="/auth/success" element={<AuthSuccess />} />
                 <Route path="/profile" element={<MyProfileRedirect />} />
                 <Route path="/profiles" element={<Profiles />} />
+                <Route path="/network" element={<Profiles />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/u/:stackUserId" element={<ProfileView />} />
                 <Route path="/onboarding" element={<Onboarding />} />
