@@ -61,7 +61,7 @@ export const listProfiles: RequestHandler = async (req, res) => {
   }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   const rows = await query(
-    `SELECT id, stack_user_id, display_name, role, tags, availability, trust_score, avatar_url, created_at FROM profiles ${where} ORDER BY created_at DESC LIMIT 100`,
+    `SELECT id, stack_user_id, display_name, role, tags, availability, trust_score, avatar_url, is_verified, created_at FROM profiles ${where} ORDER BY created_at DESC LIMIT 100`,
     params,
   );
   res.json(rows);
