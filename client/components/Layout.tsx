@@ -45,6 +45,7 @@ function SiteHeader() {
         </nav>
         <div className="flex items-center gap-2">
           <UserStatus />
+          <Link to="/settings" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground">Settings</Link>
           <Button
             asChild
             className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90"
