@@ -2,17 +2,22 @@ import { useEffect, useState } from "react";
 import { useTheme } from "@/lib/theme";
 import { useAuth, useUser } from "@/lib/fake-stack";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { signout } = useAuth();
   const user = useUser();
+  const nav = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<any>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      nav("/onboarding", { replace: true });
+      return;
+    }
     const sid = user.id;
     setLoading(true);
     fetch(`/api/profile/me?stackUserId=${encodeURIComponent(sid)}`)
