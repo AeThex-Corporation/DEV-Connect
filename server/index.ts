@@ -15,6 +15,8 @@ import { submitReport } from "./routes/reports";
 import authRouter from "./auth";
 import { signup, login } from "./routes/auth-local";
 import { query } from "./db";
+import adminRouter from "./routes/admin";
+import { listFeaturedDevs, listFeaturedJobs } from "./routes/featured";
 
 async function ensureSchema() {
   // Profiles
@@ -51,6 +53,72 @@ async function ensureSchema() {
       updated_at TIMESTAMPTZ DEFAULT now()
     )`,
   );
+
+  // Jobs
+  await query(
+    `CREATE TABLE IF NOT EXISTS jobs (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      role TEXT NOT NULL,
+      comp TEXT NOT NULL,
+      genre TEXT,
+      scope TEXT,
+      description TEXT,
+      created_by TEXT,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
+  await query(
+    `CREATE TABLE IF NOT EXISTS applications (
+      id SERIAL PRIMARY KEY,
+      job_id INTEGER REFERENCES jobs(id) ON DELETE CASCADE,
+      applicant_stack_user_id TEXT NOT NULL,
+      message TEXT,
+      status TEXT DEFAULT 'pending',
+      created_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
+
+  // Reports table
+  await query(
+    `CREATE TABLE IF NOT EXISTS reports (
+      id SERIAL PRIMARY KEY,
+      subject TEXT NOT NULL,
+      description TEXT NOT NULL,
+      status TEXT DEFAULT 'open',
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
+
+  // Featured
+  await query(
+    `CREATE TABLE IF NOT EXISTS featured_devs (
+      id SERIAL PRIMARY KEY,
+      stack_user_id TEXT UNIQUE NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
+  await query(
+    `CREATE TABLE IF NOT EXISTS featured_jobs (
+      id SERIAL PRIMARY KEY,
+      job_id INTEGER UNIQUE NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
+
+  // Support tickets
+  await query(
+    `CREATE TABLE IF NOT EXISTS tickets (
+      id SERIAL PRIMARY KEY,
+      stack_user_id TEXT,
+      subject TEXT NOT NULL,
+      body TEXT NOT NULL,
+      status TEXT DEFAULT 'open',
+      created_at TIMESTAMPTZ DEFAULT now(),
+      updated_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
 }
 
 export function createServer() {
@@ -69,6 +137,9 @@ export function createServer() {
   app.post("/api/auth/signup", signup);
   app.post("/api/auth/login", login);
 
+  // Admin routes
+  app.use("/api/admin", adminRouter);
+
   // Example API routes
   app.get("/api/ping", (_req, res) => {
     const ping = process.env.PING_MESSAGE ?? "ping";
@@ -76,6 +147,10 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // Featured (public)
+  app.get("/api/featured/devs", listFeaturedDevs);
+  app.get("/api/featured/jobs", listFeaturedJobs);
 
   // Profiles
   app.get("/api/profile/me", getMyProfile);
