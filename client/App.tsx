@@ -14,12 +14,12 @@ import Profile from "./pages/Profile";
 import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
-import { StackClient } from "./components/StackClient";
+import { FakeStackProvider } from "@/lib/fake-stack";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <StackClient>
+  <FakeStackProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -39,7 +39,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
-  </StackClient>
+  </FakeStackProvider>
 );
 
 createRoot(document.getElementById("root")!).render(<App />);
