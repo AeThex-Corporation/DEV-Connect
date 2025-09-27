@@ -3,6 +3,44 @@ import { query } from "../db";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
+async function tieAndMergeAccount(email: string, id: string, displayName?: string) {
+  // Ensure a profile exists for this user id and email
+  await query(
+    `INSERT INTO profiles (stack_user_id, email, display_name)
+     VALUES ($1,$2,$3)
+     ON CONFLICT (stack_user_id) DO NOTHING`,
+    [id, email, displayName ?? email.split("@")[0]],
+  );
+  // If another profile exists with the same email but different stack_user_id, merge it into the new id
+  const other = await query<{ stack_user_id: string; id: number }>(
+    `SELECT id, stack_user_id FROM profiles WHERE email=$1 AND stack_user_id <> $2 LIMIT 1`,
+    [email, id],
+  );
+  const oldId = other[0]?.stack_user_id;
+  if (oldId && oldId !== id) {
+    // Repoint foreign keys/references to new id; best-effort merge
+    await query(`UPDATE jobs SET created_by=$1 WHERE created_by=$2`, [id, oldId]);
+    await query(`UPDATE applications SET applicant_stack_user_id=$1 WHERE applicant_stack_user_id=$2`, [id, oldId]);
+    await query(`UPDATE messages SET sender_stack_user_id=$1 WHERE sender_stack_user_id=$2`, [id, oldId]);
+    await query(`UPDATE messages SET recipient_stack_user_id=$1 WHERE recipient_stack_user_id=$2`, [id, oldId]);
+    await query(`UPDATE favorites SET stack_user_id=$1 WHERE stack_user_id=$2`, [id, oldId]);
+    await query(`UPDATE favorites SET favorite_stack_user_id=$1 WHERE favorite_stack_user_id=$2`, [id, oldId]);
+    await query(`UPDATE presence SET stack_user_id=$1 WHERE stack_user_id=$2`, [id, oldId]);
+    await query(`UPDATE tickets SET stack_user_id=$1 WHERE stack_user_id=$2`, [id, oldId]);
+    await query(`UPDATE featured_devs SET stack_user_id=$1 WHERE stack_user_id=$2`, [id, oldId]);
+    // De-duplicate favorites after updates
+    await query(
+      `DELETE FROM favorites f USING favorites f2
+       WHERE f.id > f2.id AND f.stack_user_id=f2.stack_user_id AND f.favorite_stack_user_id=f2.favorite_stack_user_id`,
+    );
+    // Move the profile to the new id
+    await query(
+      `UPDATE profiles SET stack_user_id=$1, updated_at=now() WHERE id=$2`,
+      [id, other[0].id],
+    );
+  }
+}
+
 export const signup: RequestHandler = async (req, res) => {
   const { email, password, display_name } = req.body ?? {};
   if (!email || !password)
@@ -14,11 +52,12 @@ export const signup: RequestHandler = async (req, res) => {
   if (existing[0])
     return res.status(409).json({ error: "email already registered" });
   const hash = await bcrypt.hash(password, 10);
-  const rows = await query<{ id: number; display_name: string }>(
+  await query<{ id: number; display_name: string }>(
     `INSERT INTO users_local (email, password_hash, display_name) VALUES ($1,$2,$3) RETURNING id, display_name`,
     [email, hash, display_name ?? null],
   );
   const id = `local:${email}`;
+  await tieAndMergeAccount(email, id, display_name || email.split("@")[0]);
   res.json({ id, displayName: display_name || email.split("@")[0] });
 };
 
@@ -35,6 +74,7 @@ export const login: RequestHandler = async (req, res) => {
   const ok = await bcrypt.compare(password, row.password_hash);
   if (!ok) return res.status(401).json({ error: "invalid credentials" });
   const id = `local:${email}`;
+  await tieAndMergeAccount(email, id, row.display_name || email.split("@")[0]);
   res.json({ id, displayName: row.display_name || email.split("@")[0] });
 };
 
