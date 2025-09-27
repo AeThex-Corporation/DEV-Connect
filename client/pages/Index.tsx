@@ -219,9 +219,17 @@ function KeyPillars() {
 function FeaturedProfiles() {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
-    fetch("/api/featured/devs")
-      .then((r) => r.json())
-      .then(setItems);
+    (async () => {
+      try {
+        const r = await fetch("/api/featured/devs");
+        if (!r.ok) return;
+        const d = await r.json();
+        setItems(d || []);
+      } catch (err) {
+        console.warn("Error fetching featured devs", err);
+        setItems([]);
+      }
+    })();
   }, []);
   return (
     <section>
@@ -273,9 +281,17 @@ function FeaturedProfiles() {
 function FeaturedJobs() {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
-    fetch("/api/featured/jobs")
-      .then((r) => r.json())
-      .then(setItems);
+    (async () => {
+      try {
+        const r = await fetch("/api/featured/jobs");
+        if (!r.ok) return;
+        const d = await r.json();
+        setItems(d || []);
+      } catch (err) {
+        console.warn("Error fetching featured jobs", err);
+        setItems([]);
+      }
+    })();
   }, []);
   return (
     <section>
