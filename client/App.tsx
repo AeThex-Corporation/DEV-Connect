@@ -15,6 +15,7 @@ import Profiles from "./pages/Profiles";
 import ProfileView from "./pages/ProfileView";
 import Onboarding from "./pages/Onboarding";
 import Messages from "./pages/Messages";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 import { FakeStackProvider } from "@/lib/fake-stack";
