@@ -8,6 +8,7 @@ import { listThread, sendMessage } from "./routes/messages";
 import { listFavorites, toggleFavorite } from "./routes/favorites";
 import { submitReport } from "./routes/reports";
 import authRouter from "./auth";
+import { signup, login } from "./routes/auth-local";
 
 export function createServer() {
   const app = express();
