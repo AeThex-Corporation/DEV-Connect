@@ -1,4 +1,7 @@
-export async function safeFetch(input: RequestInfo, init?: RequestInit): Promise<Response | null> {
+export async function safeFetch(
+  input: RequestInfo,
+  init?: RequestInit,
+): Promise<Response | null> {
   if (typeof window === "undefined") return null;
   const f: any = (window as any).fetch;
   if (typeof f !== "function") {

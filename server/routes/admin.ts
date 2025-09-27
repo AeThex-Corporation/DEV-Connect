@@ -100,10 +100,12 @@ router.get("/me", async (req, res) => {
     isAdminDirect || (localEmail ? adminEnv.includes(localEmail) : false),
   );
   const is_owner = Boolean(
-    isOwnerDirect || (localEmail ? ownerEnv.includes(localEmail) : false) ||
+    isOwnerDirect ||
+      (localEmail ? ownerEnv.includes(localEmail) : false) ||
       (!ownerEnv.length && // fallback: first admin is owner if none specified
         adminEnv.length > 0 &&
-        ((id && adminEnv[0] === id) || (localEmail && adminEnv[0] === localEmail))),
+        ((id && adminEnv[0] === id) ||
+          (localEmail && adminEnv[0] === localEmail))),
   );
   res.json({ is_admin, is_owner });
 });
@@ -214,20 +216,16 @@ router.post("/badges", requireAdmin, async (req, res) => {
   res.json(rows[0] ?? null);
 });
 
-router.delete(
-  "/badges/:stackUserId/:slug",
-  requireAdmin,
-  async (req, res) => {
-    const { stackUserId, slug } = req.params as {
-      stackUserId: string;
-      slug: string;
-    };
-    await query(
-      `DELETE FROM profile_badges WHERE stack_user_id=$1 AND slug=$2`,
-      [stackUserId, slug],
-    );
-    res.json({ ok: true });
-  },
-);
+router.delete("/badges/:stackUserId/:slug", requireAdmin, async (req, res) => {
+  const { stackUserId, slug } = req.params as {
+    stackUserId: string;
+    slug: string;
+  };
+  await query(`DELETE FROM profile_badges WHERE stack_user_id=$1 AND slug=$2`, [
+    stackUserId,
+    slug,
+  ]);
+  res.json({ ok: true });
+});
 
 export default router;

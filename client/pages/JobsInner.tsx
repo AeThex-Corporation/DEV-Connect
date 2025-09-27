@@ -60,7 +60,11 @@ export default function JobsInner() {
           options={["Simulator", "FPS", "Adventure", "RPG"]}
         />
         <label className="mt-3 flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={excludeRev} onChange={(e)=> setExcludeRev(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={excludeRev}
+            onChange={(e) => setExcludeRev(e.target.checked)}
+          />
           Exclude Rev-Share
         </label>
         <Button

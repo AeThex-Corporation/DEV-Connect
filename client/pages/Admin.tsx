@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 
 export default function AdminPage() {
   const user = useUser();
-  const [tab, setTab] = useState<"featured" | "tickets" | "reports" | "verification">(
-    "featured",
-  );
+  const [tab, setTab] = useState<
+    "featured" | "tickets" | "reports" | "verification"
+  >("featured");
   const headers = useMemo(
     () => ({
       "Content-Type": "application/json",
@@ -66,9 +66,12 @@ function VerificationAdmin({ headers }: { headers: Record<string, string> }) {
   const load = async () => {
     if (!stackUserId) return;
     setLoading(true);
-    const p = await fetch(`/api/admin/profiles/${encodeURIComponent(stackUserId)}`, {
-      headers,
-    }).then((r) => r.json());
+    const p = await fetch(
+      `/api/admin/profiles/${encodeURIComponent(stackUserId)}`,
+      {
+        headers,
+      },
+    ).then((r) => r.json());
     setProfile(p);
     setLoading(false);
   };
@@ -116,7 +119,10 @@ function VerificationAdmin({ headers }: { headers: Record<string, string> }) {
             >
               Unverify
             </Button>
-            <Button onClick={() => setVerified(true)} disabled={loading || profile.is_verified}>
+            <Button
+              onClick={() => setVerified(true)}
+              disabled={loading || profile.is_verified}
+            >
               Verify
             </Button>
           </div>

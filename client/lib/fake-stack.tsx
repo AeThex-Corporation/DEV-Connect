@@ -24,12 +24,14 @@ export function FakeStackProvider({ children }: { children: React.ReactNode }) {
     if (!sb) return; // supabase not configured
     sb.auth.getSession().then(({ data }) => {
       const email = data.session?.user?.email || null;
-      const display = (data.session?.user?.user_metadata as any)?.name || email || undefined;
+      const display =
+        (data.session?.user?.user_metadata as any)?.name || email || undefined;
       if (email) setUser({ id: `local:${email}`, displayName: display });
     });
     const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
       const email = session?.user?.email || null;
-      const display = (session?.user?.user_metadata as any)?.name || email || undefined;
+      const display =
+        (session?.user?.user_metadata as any)?.name || email || undefined;
       if (email) setUser({ id: `local:${email}`, displayName: display });
       else setUser(null);
     });
@@ -66,7 +68,10 @@ export function useAuth() {
 export function UserButton() {
   const { user, signout } = useContext(AuthContext);
   const nav = useNavigate();
-  const [status, setStatus] = useState<{ is_admin: boolean; is_owner: boolean } | null>(null);
+  const [status, setStatus] = useState<{
+    is_admin: boolean;
+    is_owner: boolean;
+  } | null>(null);
   const [verified, setVerified] = useState<boolean>(false);
   useEffect(() => {
     if (!user?.id) return;

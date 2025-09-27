@@ -26,9 +26,14 @@ export default function ProfileView() {
   const nav = useNavigate();
   const [p, setP] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(false);
-  const [rating, setRating] = useState<{ average: number; count: number }>({ average: 0, count: 0 });
+  const [rating, setRating] = useState<{ average: number; count: number }>({
+    average: 0,
+    count: 0,
+  });
   const [history, setHistory] = useState<any[]>([]);
-  const [badges, setBadges] = useState<Array<{ slug: string; label?: string; icon?: string; color?: string }>>([]);
+  const [badges, setBadges] = useState<
+    Array<{ slug: string; label?: string; icon?: string; color?: string }>
+  >([]);
 
   useEffect(() => {
     if (!stackUserId) return;
@@ -46,19 +51,28 @@ export default function ProfileView() {
         const d = await r.json();
         setP(d);
         try {
-          const rr = await fetch(`/api/ratings/${encodeURIComponent(stackUserId)}`);
+          const rr = await fetch(
+            `/api/ratings/${encodeURIComponent(stackUserId)}`,
+          );
           const rv = await rr.json();
-          setRating({ average: Number(rv.average || 0), count: Number(rv.count || 0) });
+          setRating({
+            average: Number(rv.average || 0),
+            count: Number(rv.count || 0),
+          });
         } catch (e) {}
         try {
-          const br = await fetch(`/api/badges/${encodeURIComponent(stackUserId)}`);
+          const br = await fetch(
+            `/api/badges/${encodeURIComponent(stackUserId)}`,
+          );
           const bl = await br.json();
           setBadges(Array.isArray(bl) ? bl : []);
         } catch (e) {}
         try {
-          const hr = await fetch(`/api/history/${encodeURIComponent(stackUserId)}`);
+          const hr = await fetch(
+            `/api/history/${encodeURIComponent(stackUserId)}`,
+          );
           const hv = await hr.json();
-          setHistory(Array.isArray(hv)? hv: []);
+          setHistory(Array.isArray(hv) ? hv : []);
         } catch (e) {}
       } catch (err) {
         console.warn("Error loading public profile", err);
@@ -140,7 +154,10 @@ export default function ProfileView() {
                 <h1 className="text-2xl sm:text-3xl font-bold leading-tight flex items-center gap-2">
                   {p.display_name}
                   {p.is_verified && (
-                    <Badge variant="secondary" className="flex items-center gap-1">
+                    <Badge
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                    >
                       <BadgeCheck className="h-3 w-3 text-primary" /> Verified
                     </Badge>
                   )}
@@ -198,19 +215,54 @@ export default function ProfileView() {
           </div>
           <div className="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
             {p.roblox_game_url && (
-              <a className="underline" href={p.roblox_game_url} target="_blank" rel="noreferrer">Roblox game</a>
+              <a
+                className="underline"
+                href={p.roblox_game_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Roblox game
+              </a>
             )}
             {p.devforum_url && (
-              <a className="underline" href={p.devforum_url} target="_blank" rel="noreferrer">DevForum</a>
+              <a
+                className="underline"
+                href={p.devforum_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                DevForum
+              </a>
             )}
             {p.github_url && (
-              <a className="underline" href={p.github_url} target="_blank" rel="noreferrer">GitHub</a>
+              <a
+                className="underline"
+                href={p.github_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub
+              </a>
             )}
             {p.artstation_url && (
-              <a className="underline" href={p.artstation_url} target="_blank" rel="noreferrer">ArtStation</a>
+              <a
+                className="underline"
+                href={p.artstation_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                ArtStation
+              </a>
             )}
             {p.youtube_url && (
-              <a className="underline" href={p.youtube_url} target="_blank" rel="noreferrer">YouTube</a>
+              <a
+                className="underline"
+                href={p.youtube_url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                YouTube
+              </a>
             )}
           </div>
         </section>
@@ -225,7 +277,9 @@ export default function ProfileView() {
         <section className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Badges</h2>
           {badges.length === 0 ? (
-            <div className="mt-2 text-sm text-muted-foreground">No badges yet.</div>
+            <div className="mt-2 text-sm text-muted-foreground">
+              No badges yet.
+            </div>
           ) : (
             <div className="mt-2 flex flex-wrap gap-2">
               {badges.map((b) => (
@@ -239,7 +293,7 @@ export default function ProfileView() {
         <section className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Rate this profile</h2>
           <div className="mt-2 flex items-center gap-1">
-            {[1,2,3,4,5].map((s) => (
+            {[1, 2, 3, 4, 5].map((s) => (
               <button
                 key={s}
                 className="p-2"
@@ -258,13 +312,20 @@ export default function ProfileView() {
                         score: s,
                       }),
                     });
-                    const rr = await fetch(`/api/ratings/${encodeURIComponent(p!.stack_user_id)}`);
+                    const rr = await fetch(
+                      `/api/ratings/${encodeURIComponent(p!.stack_user_id)}`,
+                    );
                     const rv = await rr.json();
-                    setRating({ average: Number(rv.average || 0), count: Number(rv.count || 0) });
+                    setRating({
+                      average: Number(rv.average || 0),
+                      count: Number(rv.count || 0),
+                    });
                   } catch (e) {}
                 }}
               >
-                <Star className={`h-5 w-5 ${rating.average >= s ? "text-yellow-500" : "text-muted-foreground"}`} />
+                <Star
+                  className={`h-5 w-5 ${rating.average >= s ? "text-yellow-500" : "text-muted-foreground"}`}
+                />
               </button>
             ))}
           </div>
@@ -274,11 +335,18 @@ export default function ProfileView() {
       <section className="mt-6 rounded-xl border bg-card p-5">
         <h2 className="font-semibold">Project history</h2>
         {history.length === 0 ? (
-          <div className="mt-2 text-sm text-muted-foreground">No completed collaborations yet.</div>
+          <div className="mt-2 text-sm text-muted-foreground">
+            No completed collaborations yet.
+          </div>
         ) : (
           <ul className="mt-2 text-sm space-y-1">
-            {history.map((h)=> (
-              <li key={h.id}>#{h.job_id} · {h.title} · {h.completed_at ? new Date(h.completed_at).toLocaleDateString() : ""}</li>
+            {history.map((h) => (
+              <li key={h.id}>
+                #{h.job_id} · {h.title} ·{" "}
+                {h.completed_at
+                  ? new Date(h.completed_at).toLocaleDateString()
+                  : ""}
+              </li>
             ))}
           </ul>
         )}

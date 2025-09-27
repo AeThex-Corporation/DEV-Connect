@@ -63,14 +63,26 @@ async function ensureSchema() {
   await query(
     `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE`,
   );
-  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS payment_pref TEXT`);
-  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS devforum_url TEXT`);
-  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS discord_handle TEXT`);
-  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS roblox_user_id TEXT`);
+  await query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS payment_pref TEXT`,
+  );
+  await query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS devforum_url TEXT`,
+  );
+  await query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS discord_handle TEXT`,
+  );
+  await query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS roblox_user_id TEXT`,
+  );
   await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS github_url TEXT`);
-  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS artstation_url TEXT`);
+  await query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS artstation_url TEXT`,
+  );
   await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS youtube_url TEXT`);
-  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS roblox_game_url TEXT`);
+  await query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS roblox_game_url TEXT`,
+  );
 
   // Local users (email unique)
   await query(
@@ -293,7 +305,9 @@ export function createServer() {
       [rater_stack_user_id, ratee_stack_user_id],
     );
     if (Number(rel[0]?.cnt || 0) === 0) {
-      return res.status(403).json({ error: "rating not allowed without collaboration" });
+      return res
+        .status(403)
+        .json({ error: "rating not allowed without collaboration" });
     }
     const rows = await query(
       `INSERT INTO ratings (rater_stack_user_id, ratee_stack_user_id, score, comment)

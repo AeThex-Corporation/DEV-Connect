@@ -19,16 +19,27 @@ export default function AuthInner() {
       const sb = getSupabase();
       if (sb) {
         if (mode === "signup") {
-          const { error } = await sb.auth.signUp({ email, password, options: { data: { name } } });
+          const { error } = await sb.auth.signUp({
+            email,
+            password,
+            options: { data: { name } },
+          });
           if (error) throw error;
         } else {
-          const { error } = await sb.auth.signInWithPassword({ email, password });
+          const { error } = await sb.auth.signInWithPassword({
+            email,
+            password,
+          });
           if (error) throw error;
         }
         await fetch("/api/profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ stack_user_id: `local:${email}`, email, display_name: name || email.split("@")[0] }),
+          body: JSON.stringify({
+            stack_user_id: `local:${email}`,
+            email,
+            display_name: name || email.split("@")[0],
+          }),
         });
         signin(`local:${email}`, name || email.split("@")[0]);
       } else {

@@ -3,7 +3,11 @@ import { query } from "../db";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
-async function tieAndMergeAccount(email: string, id: string, displayName?: string) {
+async function tieAndMergeAccount(
+  email: string,
+  id: string,
+  displayName?: string,
+) {
   // Ensure a profile exists for this user id and email
   await query(
     `INSERT INTO profiles (stack_user_id, email, display_name)
@@ -19,15 +23,42 @@ async function tieAndMergeAccount(email: string, id: string, displayName?: strin
   const oldId = other[0]?.stack_user_id;
   if (oldId && oldId !== id) {
     // Repoint foreign keys/references to new id; best-effort merge
-    await query(`UPDATE jobs SET created_by=$1 WHERE created_by=$2`, [id, oldId]);
-    await query(`UPDATE applications SET applicant_stack_user_id=$1 WHERE applicant_stack_user_id=$2`, [id, oldId]);
-    await query(`UPDATE messages SET sender_stack_user_id=$1 WHERE sender_stack_user_id=$2`, [id, oldId]);
-    await query(`UPDATE messages SET recipient_stack_user_id=$1 WHERE recipient_stack_user_id=$2`, [id, oldId]);
-    await query(`UPDATE favorites SET stack_user_id=$1 WHERE stack_user_id=$2`, [id, oldId]);
-    await query(`UPDATE favorites SET favorite_stack_user_id=$1 WHERE favorite_stack_user_id=$2`, [id, oldId]);
-    await query(`UPDATE presence SET stack_user_id=$1 WHERE stack_user_id=$2`, [id, oldId]);
-    await query(`UPDATE tickets SET stack_user_id=$1 WHERE stack_user_id=$2`, [id, oldId]);
-    await query(`UPDATE featured_devs SET stack_user_id=$1 WHERE stack_user_id=$2`, [id, oldId]);
+    await query(`UPDATE jobs SET created_by=$1 WHERE created_by=$2`, [
+      id,
+      oldId,
+    ]);
+    await query(
+      `UPDATE applications SET applicant_stack_user_id=$1 WHERE applicant_stack_user_id=$2`,
+      [id, oldId],
+    );
+    await query(
+      `UPDATE messages SET sender_stack_user_id=$1 WHERE sender_stack_user_id=$2`,
+      [id, oldId],
+    );
+    await query(
+      `UPDATE messages SET recipient_stack_user_id=$1 WHERE recipient_stack_user_id=$2`,
+      [id, oldId],
+    );
+    await query(
+      `UPDATE favorites SET stack_user_id=$1 WHERE stack_user_id=$2`,
+      [id, oldId],
+    );
+    await query(
+      `UPDATE favorites SET favorite_stack_user_id=$1 WHERE favorite_stack_user_id=$2`,
+      [id, oldId],
+    );
+    await query(`UPDATE presence SET stack_user_id=$1 WHERE stack_user_id=$2`, [
+      id,
+      oldId,
+    ]);
+    await query(`UPDATE tickets SET stack_user_id=$1 WHERE stack_user_id=$2`, [
+      id,
+      oldId,
+    ]);
+    await query(
+      `UPDATE featured_devs SET stack_user_id=$1 WHERE stack_user_id=$2`,
+      [id, oldId],
+    );
     // De-duplicate favorites after updates
     await query(
       `DELETE FROM favorites f USING favorites f2
@@ -81,11 +112,9 @@ export const login: RequestHandler = async (req, res) => {
 export const changePassword: RequestHandler = async (req, res) => {
   const { stack_user_id, current_password, new_password } = req.body ?? {};
   if (!stack_user_id || !current_password || !new_password)
-    return res
-      .status(400)
-      .json({
-        error: "stack_user_id, current_password, new_password required",
-      });
+    return res.status(400).json({
+      error: "stack_user_id, current_password, new_password required",
+    });
   if (!stack_user_id.startsWith("local:"))
     return res
       .status(400)

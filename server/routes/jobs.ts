@@ -2,10 +2,8 @@ import { RequestHandler } from "express";
 import { query } from "../db";
 
 export const listJobs: RequestHandler = async (req, res) => {
-  const { role, comp, genre, q, created_by, exclude_revshare } = req.query as Record<
-    string,
-    string | undefined
-  >;
+  const { role, comp, genre, q, created_by, exclude_revshare } =
+    req.query as Record<string, string | undefined>;
   const clauses: string[] = [];
   const params: any[] = [];
   if (q) {
