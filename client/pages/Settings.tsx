@@ -62,7 +62,9 @@ export default function SettingsPage() {
     fetch(`/api/applications/mine/count?applicant=${encodeURIComponent(sid)}`)
       .then((r) => (r.ok ? r.json() : { count: 0 }))
       .then((d) => setMyApplicationsCount(d.count || 0))
-      .catch((err) => console.warn("Error fetching my applications count", err));
+      .catch((err) =>
+        console.warn("Error fetching my applications count", err),
+      );
     fetch(`/api/favorites?stack_user_id=${encodeURIComponent(sid)}`)
       .then((r) => (r.ok ? r.json() : []))
       .then((arr) => setFavoritesCount(Array.isArray(arr) ? arr.length : 0))
@@ -352,15 +354,31 @@ export default function SettingsPage() {
             Command center: your stats and activity
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard label="Profile completion" value={(() => {
-              const filled = [form?.display_name, form?.role, (form?.tags||[]).length ? "x" : null].filter(Boolean).length;
-              const pct = Math.round((filled / 3) * 100);
-              return `${pct}%`;
-            })()} />
+            <MetricCard
+              label="Profile completion"
+              value={(() => {
+                const filled = [
+                  form?.display_name,
+                  form?.role,
+                  (form?.tags || []).length ? "x" : null,
+                ].filter(Boolean).length;
+                const pct = Math.round((filled / 3) * 100);
+                return `${pct}%`;
+              })()}
+            />
             <MetricCard label="My jobs" value={jobsCount.toLocaleString()} />
-            <MetricCard label="Incoming applications" value={incoming.length.toLocaleString()} />
-            <MetricCard label="Applications sent" value={myApplicationsCount.toLocaleString()} />
-            <MetricCard label="Favorites" value={favoritesCount.toLocaleString()} />
+            <MetricCard
+              label="Incoming applications"
+              value={incoming.length.toLocaleString()}
+            />
+            <MetricCard
+              label="Applications sent"
+              value={myApplicationsCount.toLocaleString()}
+            />
+            <MetricCard
+              label="Favorites"
+              value={favoritesCount.toLocaleString()}
+            />
             <MetricCard label="Online now" value={onlineNow.toLocaleString()} />
           </div>
           <div className="mt-5 flex gap-2">
@@ -470,7 +488,13 @@ export default function SettingsPage() {
   );
 }
 
-function MetricCard({ label, value }: { label: string; value: string | number }) {
+function MetricCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
   return (
     <div className="rounded-lg border bg-muted/40 p-4">
       <div className="text-xs text-muted-foreground">{label}</div>

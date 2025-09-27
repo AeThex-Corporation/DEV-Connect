@@ -29,7 +29,9 @@ export default function ProfileView() {
     setLoading(true);
     (async () => {
       try {
-        const r = await fetch(`/api/profile/${encodeURIComponent(stackUserId)}`);
+        const r = await fetch(
+          `/api/profile/${encodeURIComponent(stackUserId)}`,
+        );
         if (!r.ok) {
           console.warn("Failed to load public profile", r.status);
           setP(null);

@@ -300,14 +300,25 @@ export function createServer() {
 
   // Site stats
   app.get("/api/stats", async (_req, res) => {
-    const [profiles, verifiedProfiles, jobs, applications, messages, online] = await Promise.all([
-      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM profiles`),
-      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM profiles WHERE passport_id IS NOT NULL`),
-      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM jobs`),
-      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM applications`),
-      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM messages`),
-      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM presence WHERE updated_at > now() - interval '5 minutes'`),
-    ]);
+    const [profiles, verifiedProfiles, jobs, applications, messages, online] =
+      await Promise.all([
+        query<{ count: string }>(
+          `SELECT COUNT(*)::text as count FROM profiles`,
+        ),
+        query<{ count: string }>(
+          `SELECT COUNT(*)::text as count FROM profiles WHERE passport_id IS NOT NULL`,
+        ),
+        query<{ count: string }>(`SELECT COUNT(*)::text as count FROM jobs`),
+        query<{ count: string }>(
+          `SELECT COUNT(*)::text as count FROM applications`,
+        ),
+        query<{ count: string }>(
+          `SELECT COUNT(*)::text as count FROM messages`,
+        ),
+        query<{ count: string }>(
+          `SELECT COUNT(*)::text as count FROM presence WHERE updated_at > now() - interval '5 minutes'`,
+        ),
+      ]);
     res.json({
       profiles: Number(profiles[0]?.count || 0),
       verifiedProfiles: Number(verifiedProfiles[0]?.count || 0),

@@ -80,7 +80,15 @@ function HeroSection({
         const d = await r.json();
         if (alive) setStats(d);
       } catch {
-        if (alive) setStats({ profiles: 0, verifiedProfiles: 0, jobs: 0, applications: 0, messages: 0, online: 0 });
+        if (alive)
+          setStats({
+            profiles: 0,
+            verifiedProfiles: 0,
+            jobs: 0,
+            applications: 0,
+            messages: 0,
+            online: 0,
+          });
       }
     })();
     return () => {
