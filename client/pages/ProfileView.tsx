@@ -24,23 +24,38 @@ export default function ProfileView() {
   useEffect(() => {
     if (!stackUserId) return;
     setLoading(true);
-    fetch(`/api/profile/${encodeURIComponent(stackUserId)}`).then(r=>r.json()).then(setP).finally(()=>setLoading(false));
+    fetch(`/api/profile/${encodeURIComponent(stackUserId)}`)
+      .then((r) => r.json())
+      .then(setP)
+      .finally(() => setLoading(false));
   }, [stackUserId]);
 
   if (loading) return <div>Loading...</div>;
-  if (!p) return <div className="text-sm text-muted-foreground">Profile not found.</div>;
+  if (!p)
+    return (
+      <div className="text-sm text-muted-foreground">Profile not found.</div>
+    );
 
   const tags = p.tags ?? [];
 
   async function favorite() {
-    await fetch('/api/favorites/toggle', { method: 'POST', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ favorite_stack_user_id: p!.stack_user_id, stack_user_id: localStorage.getItem('rbx_user') ? JSON.parse(localStorage.getItem('rbx_user') as string).id : '' }) });
+    await fetch("/api/favorites/toggle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        favorite_stack_user_id: p!.stack_user_id,
+        stack_user_id: localStorage.getItem("rbx_user")
+          ? JSON.parse(localStorage.getItem("rbx_user") as string).id
+          : "",
+      }),
+    });
   }
 
   async function connect() {
     window.location.href = `/messages?peer=${encodeURIComponent(p!.stack_user_id)}`;
   }
 
-  const initial = (p.display_name||'U').charAt(0).toUpperCase();
+  const initial = (p.display_name || "U").charAt(0).toUpperCase();
   return (
     <div className="mx-auto max-w-4xl">
       <section className="rounded-2xl border bg-card p-6 sm:p-8">
@@ -50,19 +65,34 @@ export default function ProfileView() {
               {initial}
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold leading-tight">{p.display_name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
+                {p.display_name}
+              </h1>
               <p className="text-muted-foreground">{p.role || "Developer"}</p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {tags.slice(0,6).map((t)=> (
-                  <span key={t} className="text-xs rounded-md px-2 py-1 bg-muted text-muted-foreground">{t}</span>
+                {tags.slice(0, 6).map((t) => (
+                  <span
+                    key={t}
+                    className="text-xs rounded-md px-2 py-1 bg-muted text-muted-foreground"
+                  >
+                    {t}
+                  </span>
                 ))}
               </div>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button onClick={connect}>Connect</Button>
-            <Button variant="outline" onClick={favorite}>Favorite</Button>
-            <Button asChild variant="outline"><Link to={`/messages?peer=${encodeURIComponent(p.stack_user_id)}`}>Message</Link></Button>
+            <Button variant="outline" onClick={favorite}>
+              Favorite
+            </Button>
+            <Button asChild variant="outline">
+              <Link
+                to={`/messages?peer=${encodeURIComponent(p.stack_user_id)}`}
+              >
+                Message
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -70,7 +100,9 @@ export default function ProfileView() {
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <section className="rounded-xl border bg-card p-5 lg:col-span-2">
           <h2 className="font-semibold">About</h2>
-          <div className="mt-3 text-sm text-muted-foreground">Availability: {p.availability ?? "—"}</div>
+          <div className="mt-3 text-sm text-muted-foreground">
+            Availability: {p.availability ?? "—"}
+          </div>
         </section>
         <section className="rounded-xl border bg-card p-5">
           <h2 className="font-semibold">Contact</h2>

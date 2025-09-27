@@ -20,10 +20,19 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (!user) return;
-    setForm((f) => ({ ...f, stack_user_id: user.id, display_name: user.displayName || f.display_name }));
+    setForm((f) => ({
+      ...f,
+      stack_user_id: user.id,
+      display_name: user.displayName || f.display_name,
+    }));
   }, [user]);
 
-  if (!user) return <div className="text-center text-sm text-muted-foreground">Sign in to start onboarding.</div>;
+  if (!user)
+    return (
+      <div className="text-center text-sm text-muted-foreground">
+        Sign in to start onboarding.
+      </div>
+    );
 
   const next = () => setStep((s) => Math.min(3, s + 1));
   const prev = () => setStep((s) => Math.max(1, s - 1));
@@ -44,23 +53,54 @@ export default function Onboarding() {
           <div className="grid gap-3">
             <label className="grid gap-1 text-sm">
               <span className="text-muted-foreground">Display name</span>
-              <input className="rounded-md border bg-background px-3 py-2" value={form.display_name} onChange={(e)=>setForm({ ...form, display_name: e.target.value })} />
+              <input
+                className="rounded-md border bg-background px-3 py-2"
+                value={form.display_name}
+                onChange={(e) =>
+                  setForm({ ...form, display_name: e.target.value })
+                }
+              />
             </label>
             <label className="grid gap-1 text-sm">
               <span className="text-muted-foreground">Primary role</span>
-              <input className="rounded-md border bg-background px-3 py-2" placeholder="Scripter, Builder, Designer..." value={form.role} onChange={(e)=>setForm({ ...form, role: e.target.value })} />
+              <input
+                className="rounded-md border bg-background px-3 py-2"
+                placeholder="Scripter, Builder, Designer..."
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+              />
             </label>
           </div>
         )}
         {step === 2 && (
           <div className="grid gap-3">
             <label className="grid gap-1 text-sm">
-              <span className="text-muted-foreground">Skills / tags (comma separated)</span>
-              <input className="rounded-md border bg-background px-3 py-2" value={form.tags.join(", ")} onChange={(e)=>setForm({ ...form, tags: e.target.value.split(",").map(s=>s.trim()).filter(Boolean) })} />
+              <span className="text-muted-foreground">
+                Skills / tags (comma separated)
+              </span>
+              <input
+                className="rounded-md border bg-background px-3 py-2"
+                value={form.tags.join(", ")}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    tags: e.target.value
+                      .split(",")
+                      .map((s) => s.trim())
+                      .filter(Boolean),
+                  })
+                }
+              />
             </label>
             <label className="grid gap-1 text-sm">
               <span className="text-muted-foreground">Availability</span>
-              <select className="rounded-md border bg-background px-3 py-2" value={form.availability} onChange={(e)=>setForm({ ...form, availability: e.target.value })}>
+              <select
+                className="rounded-md border bg-background px-3 py-2"
+                value={form.availability}
+                onChange={(e) =>
+                  setForm({ ...form, availability: e.target.value })
+                }
+              >
                 <option>Open to Work</option>
                 <option>Only Networking</option>
                 <option>Unavailable</option>
@@ -72,26 +112,48 @@ export default function Onboarding() {
           <div className="grid gap-3">
             <label className="grid gap-1 text-sm">
               <span className="text-muted-foreground">Discord</span>
-              <input className="rounded-md border bg-background px-3 py-2" value={form.contact_discord} onChange={(e)=>setForm({ ...form, contact_discord: e.target.value })} />
+              <input
+                className="rounded-md border bg-background px-3 py-2"
+                value={form.contact_discord}
+                onChange={(e) =>
+                  setForm({ ...form, contact_discord: e.target.value })
+                }
+              />
             </label>
             <div className="grid sm:grid-cols-2 gap-3">
               <label className="grid gap-1 text-sm">
                 <span className="text-muted-foreground">Roblox ID</span>
-                <input className="rounded-md border bg-background px-3 py-2" value={form.contact_roblox} onChange={(e)=>setForm({ ...form, contact_roblox: e.target.value })} />
+                <input
+                  className="rounded-md border bg-background px-3 py-2"
+                  value={form.contact_roblox}
+                  onChange={(e) =>
+                    setForm({ ...form, contact_roblox: e.target.value })
+                  }
+                />
               </label>
               <label className="grid gap-1 text-sm">
                 <span className="text-muted-foreground">Twitter</span>
-                <input className="rounded-md border bg-background px-3 py-2" value={form.contact_twitter} onChange={(e)=>setForm({ ...form, contact_twitter: e.target.value })} />
+                <input
+                  className="rounded-md border bg-background px-3 py-2"
+                  value={form.contact_twitter}
+                  onChange={(e) =>
+                    setForm({ ...form, contact_twitter: e.target.value })
+                  }
+                />
               </label>
             </div>
           </div>
         )}
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={prev} disabled={step===1}>Back</Button>
-          {step<3 ? (
+          <Button variant="ghost" onClick={prev} disabled={step === 1}>
+            Back
+          </Button>
+          {step < 3 ? (
             <Button onClick={next}>Next</Button>
           ) : (
-            <Button onClick={save} disabled={!form.display_name || !form.role}>Finish</Button>
+            <Button onClick={save} disabled={!form.display_name || !form.role}>
+              Finish
+            </Button>
           )}
         </div>
       </div>

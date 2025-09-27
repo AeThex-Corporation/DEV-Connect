@@ -7,22 +7,22 @@ export function ThemeToggle() {
     <div className="inline-flex items-center rounded-md border bg-background">
       <button
         aria-label="Light"
-        className={`px-2 py-1 text-sm ${theme==='light' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}`}
-        onClick={() => setTheme('light')}
+        className={`px-2 py-1 text-sm ${theme === "light" ? "bg-accent text-accent-foreground" : "text-muted-foreground"}`}
+        onClick={() => setTheme("light")}
       >
         <Sun className="h-4 w-4" />
       </button>
       <button
         aria-label="System"
-        className={`px-2 py-1 text-sm ${theme==='system' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}`}
-        onClick={() => setTheme('system')}
+        className={`px-2 py-1 text-sm ${theme === "system" ? "bg-accent text-accent-foreground" : "text-muted-foreground"}`}
+        onClick={() => setTheme("system")}
       >
         <Laptop className="h-4 w-4" />
       </button>
       <button
         aria-label="Dark"
-        className={`px-2 py-1 text-sm ${theme==='dark' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'}`}
-        onClick={() => setTheme('dark')}
+        className={`px-2 py-1 text-sm ${theme === "dark" ? "bg-accent text-accent-foreground" : "text-muted-foreground"}`}
+        onClick={() => setTheme("dark")}
       >
         <Moon className="h-4 w-4" />
       </button>

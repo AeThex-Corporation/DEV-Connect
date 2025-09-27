@@ -1,8 +1,14 @@
 import express, { RequestHandler } from "express";
 import session from "express-session";
 import passport from "passport";
-import { Strategy as DiscordStrategy, Profile as DiscordProfile } from "passport-discord";
-import { Strategy as GitHubStrategy, Profile as GitHubProfile } from "passport-github2";
+import {
+  Strategy as DiscordStrategy,
+  Profile as DiscordProfile,
+} from "passport-discord";
+import {
+  Strategy as GitHubStrategy,
+  Profile as GitHubProfile,
+} from "passport-github2";
 
 const router = express.Router();
 
@@ -89,18 +95,26 @@ router.get(
   passport.authenticate("discord", { failureRedirect: "/auth?error=discord" }),
   (req, res) => {
     const user = req.user as any;
-    res.redirect(`/auth/success?id=${encodeURIComponent(user.id)}&name=${encodeURIComponent(user.displayName || "User")}`);
+    res.redirect(
+      `/auth/success?id=${encodeURIComponent(user.id)}&name=${encodeURIComponent(user.displayName || "User")}`,
+    );
   },
 );
 
 // GitHub
-router.get("/auth/github", ensureConfigured, passport.authenticate("github", { scope: ["user:email"] }));
+router.get(
+  "/auth/github",
+  ensureConfigured,
+  passport.authenticate("github", { scope: ["user:email"] }),
+);
 router.get(
   "/auth/github/callback",
   passport.authenticate("github", { failureRedirect: "/auth?error=github" }),
   (req, res) => {
     const user = req.user as any;
-    res.redirect(`/auth/success?id=${encodeURIComponent(user.id)}&name=${encodeURIComponent(user.displayName || "User")}`);
+    res.redirect(
+      `/auth/success?id=${encodeURIComponent(user.id)}&name=${encodeURIComponent(user.displayName || "User")}`,
+    );
   },
 );
 

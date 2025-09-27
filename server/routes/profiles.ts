@@ -14,7 +14,8 @@ export const getMyProfile: RequestHandler = async (req, res) => {
 
 export const getPublicProfile: RequestHandler = async (req, res) => {
   const { stackUserId } = req.params as { stackUserId: string };
-  if (!stackUserId) return res.status(400).json({ error: "stackUserId required" });
+  if (!stackUserId)
+    return res.status(400).json({ error: "stackUserId required" });
   const rows = await query(
     `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
     [stackUserId],
@@ -27,8 +28,20 @@ export const listProfiles: RequestHandler = async (req, res) => {
   const { q, role } = req.query as Record<string, string | undefined>;
   const clauses: string[] = [];
   const params: any[] = [];
-  if (q) { params.push(`%${q.toLowerCase()}%`); clauses.push("(LOWER(display_name) LIKE $" + params.length + " OR LOWER(role) LIKE $" + params.length + ")"); }
-  if (role) { params.push(role); clauses.push("role = $" + params.length); }
+  if (q) {
+    params.push(`%${q.toLowerCase()}%`);
+    clauses.push(
+      "(LOWER(display_name) LIKE $" +
+        params.length +
+        " OR LOWER(role) LIKE $" +
+        params.length +
+        ")",
+    );
+  }
+  if (role) {
+    params.push(role);
+    clauses.push("role = $" + params.length);
+  }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   const rows = await query(
     `SELECT id, stack_user_id, display_name, role, tags, availability, trust_score, created_at FROM profiles ${where} ORDER BY created_at DESC LIMIT 100`,

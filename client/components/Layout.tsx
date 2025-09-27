@@ -45,7 +45,12 @@ function SiteHeader() {
         </nav>
         <div className="flex items-center gap-2">
           <UserStatus />
-          <Link to="/settings" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground">Settings</Link>
+          <Link
+            to="/settings"
+            className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground"
+          >
+            Settings
+          </Link>
           <Button
             asChild
             className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90"
@@ -126,9 +131,15 @@ function SiteFooter() {
         <div>
           <h4 className="font-semibold mb-3">Safety</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/safety/verification">Verification & ratings</Link></li>
-            <li><Link to="/safety/moderation">Moderation & reporting</Link></li>
-            <li><Link to="/safety/contracts">Contract templates</Link></li>
+            <li>
+              <Link to="/safety/verification">Verification & ratings</Link>
+            </li>
+            <li>
+              <Link to="/safety/moderation">Moderation & reporting</Link>
+            </li>
+            <li>
+              <Link to="/safety/contracts">Contract templates</Link>
+            </li>
           </ul>
         </div>
         <div>
