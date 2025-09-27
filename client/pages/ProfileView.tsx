@@ -15,6 +15,7 @@ interface PublicProfile {
   portfolio?: any[];
   avatar_url?: string;
   banner_url?: string;
+  passport_id?: string;
 }
 
 export default function ProfileView() {
@@ -133,6 +134,9 @@ export default function ProfileView() {
           <h2 className="font-semibold">About</h2>
           <div className="mt-3 text-sm text-muted-foreground">
             Availability: {p.availability ?? "—"}
+          </div>
+          <div className="mt-3 text-xs text-muted-foreground">
+            Passport ID: <span className="font-mono select-all">{p.passport_id || "—"}</span>
           </div>
         </section>
         <section className="rounded-xl border bg-card p-5">
