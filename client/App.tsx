@@ -21,6 +21,7 @@ import Settings from "./pages/Settings";
 import Verification from "./pages/safety/Verification";
 import Moderation from "./pages/safety/Moderation";
 import Contracts from "./pages/safety/Contracts";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 import { FakeStackProvider } from "@/lib/fake-stack";
@@ -53,6 +54,7 @@ const App = () => (
                 <Route path="/safety/verification" element={<Verification />} />
                 <Route path="/safety/moderation" element={<Moderation />} />
                 <Route path="/safety/contracts" element={<Contracts />} />
+                <Route path="/admin" element={<Admin />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Route>
