@@ -5,6 +5,7 @@ import { Briefcase, Home, Sparkles } from "lucide-react";
 import { UserStatus } from "./UserStatus";
 import { useUser } from "@/lib/fake-stack";
 import { useEffect, useMemo, useState } from "react";
+import { safeFetch } from "@/lib/safe-fetch";
 
 export function Layout() {
   return (
@@ -32,9 +33,14 @@ function SiteHeader() {
         return;
       }
       try {
-        const r = await fetch(
+        const r = await safeFetch(
           `/api/applications/incoming/count?owner=${encodeURIComponent(user.id)}`,
         );
+        if (!r) {
+          // safeFetch returned null due to network or fetch not available
+          setIncomingCount(0);
+          return;
+        }
         if (!r.ok) {
           console.warn("Failed to fetch incoming count", r.status);
           setIncomingCount(0);
@@ -145,12 +151,14 @@ function SiteFooter() {
       try {
         if (user?.id) {
           try {
-            const resp = await fetch(`/api/presence/ping`, {
+            const resp = await safeFetch(`/api/presence/ping`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ stack_user_id: user.id }),
             });
-            if (!resp.ok) {
+            if (!resp) {
+              console.warn("Presence ping failed: no response from fetch");
+            } else if (!resp.ok) {
               console.warn("Presence ping failed", resp.status);
             }
           } catch (err) {
@@ -159,7 +167,12 @@ function SiteFooter() {
           }
         }
         try {
-          const r = await fetch(`/api/presence/online`);
+          const r = await safeFetch(`/api/presence/online`);
+          if (!r) {
+            console.warn("Failed to fetch online count (no response)");
+            setOnline(0);
+            return;
+          }
           if (!r.ok) {
             console.warn("Failed to fetch online count", r.status);
             setOnline(0);
