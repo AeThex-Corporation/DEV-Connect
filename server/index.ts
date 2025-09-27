@@ -95,6 +95,29 @@ async function ensureSchema() {
     )`,
   );
 
+  // Messages
+  await query(
+    `CREATE TABLE IF NOT EXISTS messages (
+      id SERIAL PRIMARY KEY,
+      thread_id TEXT NOT NULL,
+      sender_stack_user_id TEXT NOT NULL,
+      recipient_stack_user_id TEXT NOT NULL,
+      body TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
+
+  // Favorites
+  await query(
+    `CREATE TABLE IF NOT EXISTS favorites (
+      id SERIAL PRIMARY KEY,
+      stack_user_id TEXT NOT NULL,
+      favorite_stack_user_id TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now(),
+      UNIQUE (stack_user_id, favorite_stack_user_id)
+    )`,
+  );
+
   // Reports table
   await query(
     `CREATE TABLE IF NOT EXISTS reports (
@@ -211,6 +234,16 @@ export function createServer() {
   app.post("/api/jobs", createJob);
   app.get("/api/jobs/:id", getJob);
   app.post("/api/jobs/:id/apply", applyToJob);
+  // Jobs count for a specific owner
+  app.get("/api/jobs/mine/count", async (req, res) => {
+    const owner = String(req.query.owner || "");
+    if (!owner) return res.json({ count: 0 });
+    const rows = await query<{ count: string }>(
+      `SELECT COUNT(*)::text as count FROM jobs WHERE created_by=$1`,
+      [owner],
+    );
+    res.json({ count: Number(rows[0]?.count || 0) });
+  });
 
   // Messages
   app.get("/api/messages", listThread);
@@ -218,6 +251,15 @@ export function createServer() {
 
   // Applications
   app.get("/api/applications/incoming", listIncomingApplications);
+  app.get("/api/applications/mine/count", async (req, res) => {
+    const applicant = String(req.query.applicant || "");
+    if (!applicant) return res.json({ count: 0 });
+    const rows = await query<{ count: string }>(
+      `SELECT COUNT(*)::text as count FROM applications WHERE applicant_stack_user_id=$1`,
+      [applicant],
+    );
+    res.json({ count: Number(rows[0]?.count || 0) });
+  });
 
   // Favorites
   app.get("/api/favorites", listFavorites);
@@ -254,6 +296,26 @@ export function createServer() {
       [owner],
     );
     res.json({ count: Number(rows[0]?.count || 0) });
+  });
+
+  // Site stats
+  app.get("/api/stats", async (_req, res) => {
+    const [profiles, verifiedProfiles, jobs, applications, messages, online] = await Promise.all([
+      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM profiles`),
+      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM profiles WHERE passport_id IS NOT NULL`),
+      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM jobs`),
+      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM applications`),
+      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM messages`),
+      query<{ count: string }>(`SELECT COUNT(*)::text as count FROM presence WHERE updated_at > now() - interval '5 minutes'`),
+    ]);
+    res.json({
+      profiles: Number(profiles[0]?.count || 0),
+      verifiedProfiles: Number(verifiedProfiles[0]?.count || 0),
+      jobs: Number(jobs[0]?.count || 0),
+      applications: Number(applications[0]?.count || 0),
+      messages: Number(messages[0]?.count || 0),
+      online: Number(online[0]?.count || 0),
+    });
   });
 
   return app;
