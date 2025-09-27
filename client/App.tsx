@@ -18,34 +18,37 @@ import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 import { Layout } from "./components/Layout";
 import { FakeStackProvider } from "@/lib/fake-stack";
+import { ThemeProvider } from "@/lib/theme";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <FakeStackProvider>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profiles" element={<Profiles />} />
-              <Route path="/u/:stackUserId" element={<ProfileView />} />
-              <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/messages" element={<Messages />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </FakeStackProvider>
+  <ThemeProvider>
+    <FakeStackProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/profiles" element={<Profiles />} />
+                <Route path="/u/:stackUserId" element={<ProfileView />} />
+                <Route path="/onboarding" element={<Onboarding />} />
+                <Route path="/messages" element={<Messages />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </FakeStackProvider>
+  </ThemeProvider>
 );
 
 createRoot(document.getElementById("root")!).render(<App />);
