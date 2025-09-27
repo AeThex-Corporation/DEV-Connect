@@ -119,6 +119,29 @@ async function ensureSchema() {
       updated_at TIMESTAMPTZ DEFAULT now()
     )`,
   );
+
+  // Password resets
+  await query(
+    `CREATE TABLE IF NOT EXISTS password_resets (
+      id SERIAL PRIMARY KEY,
+      email TEXT NOT NULL,
+      token TEXT UNIQUE NOT NULL,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
+
+  // Presence
+  await query(
+    `CREATE TABLE IF NOT EXISTS presence (
+      id SERIAL PRIMARY KEY,
+      stack_user_id TEXT UNIQUE,
+      updated_at TIMESTAMPTZ DEFAULT now()
+    )`,
+  );
+
+  // Applications viewed flag
+  await query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS viewed_by_owner BOOLEAN DEFAULT false`);
 }
 
 export function createServer() {
