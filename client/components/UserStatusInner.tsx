@@ -1,5 +1,5 @@
 import React from "react";
-import { useUser, UserButton } from "@stackframe/stack";
+import { useUser, UserButton } from "@/lib/fake-stack";
 import { Link } from "react-router-dom";
 
 export default function UserStatusInner() {
