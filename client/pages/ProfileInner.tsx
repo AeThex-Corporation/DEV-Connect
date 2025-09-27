@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useUser, StackTheme } from "@stackframe/stack";
+import { useUser, StackTheme } from "@/lib/fake-stack";
 import { Button } from "@/components/ui/button";
 
 interface ProfilePayload {
