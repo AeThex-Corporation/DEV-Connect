@@ -12,6 +12,9 @@ export default function SettingsPage() {
 
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<any>(null);
+  const [tab, setTab] = useState<"dashboard" | "appearance" | "profile" | "security">("dashboard");
+  const [incoming, setIncoming] = useState<any[]>([]);
+  const [pwd, setPwd] = useState({ current: "", next: "" });
 
   useEffect(() => {
     if (!user) {
@@ -39,6 +42,9 @@ export default function SettingsPage() {
         });
       })
       .finally(() => setLoading(false));
+    fetch(`/api/applications/incoming?owner=${encodeURIComponent(sid)}`)
+      .then((r) => r.json())
+      .then(setIncoming);
   }, [user]);
 
   const save = async () => {
@@ -51,15 +57,32 @@ export default function SettingsPage() {
     setLoading(false);
   };
 
+  const changePassword = async () => {
+    if (!user) return;
+    await fetch("/api/auth/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stack_user_id: user.id, current_password: pwd.current, new_password: pwd.next }),
+    });
+    setPwd({ current: "", next: "" });
+  };
+
   return (
     <div className="mx-auto max-w-3xl grid gap-6">
-      <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage appearance, account, and profile.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Settings</h1>
+          <p className="text-sm text-muted-foreground">Manage your account, profile, and jobs.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant={tab === "dashboard" ? undefined : "outline"} onClick={() => setTab("dashboard")}>Dashboard</Button>
+          <Button variant={tab === "appearance" ? undefined : "outline"} onClick={() => setTab("appearance")}>Appearance</Button>
+          <Button variant={tab === "profile" ? undefined : "outline"} onClick={() => setTab("profile")}>Profile</Button>
+          <Button variant={tab === "security" ? undefined : "outline"} onClick={() => setTab("security")}>Security</Button>
+        </div>
       </div>
 
+      {tab === "appearance" && (
       <section className="rounded-xl border bg-card p-5">
         <h2 className="font-semibold">Appearance</h2>
         <div className="mt-3 grid gap-2">
@@ -92,7 +115,9 @@ export default function SettingsPage() {
           </label>
         </div>
       </section>
+      )}
 
+      {tab === "profile" && (
       <section className="rounded-xl border bg-card p-5">
         <h2 className="font-semibold">Profile</h2>
         {!form ? (
@@ -248,6 +273,53 @@ export default function SettingsPage() {
           </div>
         )}
       </section>
+      )}
+
+      {tab === "dashboard" && (
+      <section className="rounded-xl border bg-card p-5">
+        <h2 className="font-semibold">Dashboard</h2>
+        <div className="mt-2 text-sm text-muted-foreground">Quick links and recent activity</div>
+        <div className="mt-4 flex gap-2">
+          <Button asChild>
+            <a href="/jobs">Post a job</a>
+          </Button>
+          <Button asChild variant="outline">
+            <a href={`/u/${encodeURIComponent(user?.id || "")}`}>View profile</a>
+          </Button>
+        </div>
+        <div className="mt-6">
+          <h3 className="font-medium">Incoming applications</h3>
+          <ul className="mt-2 text-sm">
+            {incoming.length === 0 && (
+              <li className="text-muted-foreground">No applications yet.</li>
+            )}
+            {incoming.map((a) => (
+              <li key={a.id} className="py-1">{a.job_title} — {a.applicant_stack_user_id} — {a.status}</li>
+            ))}
+          </ul>
+        </div>
+      </section>
+      )}
+
+      {tab === "security" && (
+      <section className="rounded-xl border bg-card p-5">
+        <h2 className="font-semibold">Security</h2>
+        <div className="mt-2 text-sm text-muted-foreground">Change your password (local accounts)</div>
+        <div className="mt-3 grid sm:grid-cols-2 gap-3">
+          <label className="grid gap-1 text-sm">
+            <span className="text-muted-foreground">Current password</span>
+            <input className="w-full rounded-md border bg-background px-3 py-2" type="password" value={pwd.current} onChange={(e) => setPwd({ ...pwd, current: e.target.value })} />
+          </label>
+          <label className="grid gap-1 text-sm">
+            <span className="text-muted-foreground">New password</span>
+            <input className="w-full rounded-md border bg-background px-3 py-2" type="password" value={pwd.next} onChange={(e) => setPwd({ ...pwd, next: e.target.value })} />
+          </label>
+        </div>
+        <div className="mt-3 flex justify-end">
+          <Button onClick={changePassword} disabled={!pwd.current || !pwd.next}>Change password</Button>
+        </div>
+      </section>
+      )}
 
       <section className="rounded-xl border bg-card p-5">
         <h2 className="font-semibold">Account</h2>
