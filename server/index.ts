@@ -7,6 +7,7 @@ import { listJobs, createJob, getJob, applyToJob } from "./routes/jobs";
 import { listThread, sendMessage } from "./routes/messages";
 import { listFavorites, toggleFavorite } from "./routes/favorites";
 import { submitReport } from "./routes/reports";
+import authRouter from "./auth";
 
 export function createServer() {
   const app = express();
@@ -15,6 +16,9 @@ export function createServer() {
   app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  // Auth router (includes session and passport)
+  app.use("/api", authRouter);
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
