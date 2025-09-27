@@ -82,3 +82,19 @@ export const applyToJob: RequestHandler = async (req, res) => {
   );
   res.status(201).json(rows[0]);
 };
+
+export const listIncomingApplications: RequestHandler = async (req, res) => {
+  const owner = String((req.query.owner as string) || "");
+  if (!owner) return res.json([]);
+  const rows = await query(
+    `SELECT a.id, a.job_id, a.applicant_stack_user_id, a.message, a.status, a.created_at,
+            j.title as job_title
+     FROM applications a
+     JOIN jobs j ON j.id = a.job_id
+     WHERE j.created_by = $1
+     ORDER BY a.created_at DESC
+     LIMIT 100`,
+    [owner],
+  );
+  res.json(rows);
+};
