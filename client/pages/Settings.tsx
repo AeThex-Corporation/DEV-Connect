@@ -45,6 +45,14 @@ export default function SettingsPage() {
           trust_score: data?.trust_score ?? 0,
           avatar_url: data?.avatar_url ?? "",
           banner_url: data?.banner_url ?? "",
+          payment_pref: data?.payment_pref ?? "",
+          devforum_url: data?.devforum_url ?? "",
+          discord_handle: data?.discord_handle ?? (data?.contact_discord ?? ""),
+          roblox_user_id: data?.roblox_user_id ?? (data?.contact_roblox ?? ""),
+          github_url: data?.github_url ?? "",
+          artstation_url: data?.artstation_url ?? "",
+          youtube_url: data?.youtube_url ?? "",
+          roblox_game_url: data?.roblox_game_url ?? "",
         });
       })
       .catch((err) => {
@@ -336,6 +344,43 @@ export default function SettingsPage() {
                     <option>Unavailable</option>
                   </select>
                 </Field>
+                <Field label="Payment preference">
+                  <select
+                    className="w-full rounded-md border bg-background px-3 py-2"
+                    value={form.payment_pref ?? ""}
+                    onChange={(e) => setForm({ ...form, payment_pref: e.target.value })}
+                  >
+                    <option value="">Select...</option>
+                    <option>USD/Hourly</option>
+                    <option>USD/Fixed</option>
+                    <option>Robux</option>
+                    <option>Percent</option>
+                    <option>Rev Share</option>
+                  </select>
+                </Field>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Field label="Roblox game URL">
+                    <input className="w-full rounded-md border bg-background px-3 py-2" value={form.roblox_game_url ?? ""} onChange={(e)=>setForm({...form, roblox_game_url: e.target.value})} />
+                  </Field>
+                  <Field label="DevForum URL">
+                    <input className="w-full rounded-md border bg-background px-3 py-2" value={form.devforum_url ?? ""} onChange={(e)=>setForm({...form, devforum_url: e.target.value})} />
+                  </Field>
+                  <Field label="Discord handle">
+                    <input className="w-full rounded-md border bg-background px-3 py-2" value={form.discord_handle ?? ""} onChange={(e)=>setForm({...form, discord_handle: e.target.value})} />
+                  </Field>
+                  <Field label="Roblox User ID">
+                    <input className="w-full rounded-md border bg-background px-3 py-2" value={form.roblox_user_id ?? ""} onChange={(e)=>setForm({...form, roblox_user_id: e.target.value})} />
+                  </Field>
+                  <Field label="GitHub URL">
+                    <input className="w-full rounded-md border bg-background px-3 py-2" value={form.github_url ?? ""} onChange={(e)=>setForm({...form, github_url: e.target.value})} />
+                  </Field>
+                  <Field label="ArtStation URL">
+                    <input className="w-full rounded-md border bg-background px-3 py-2" value={form.artstation_url ?? ""} onChange={(e)=>setForm({...form, artstation_url: e.target.value})} />
+                  </Field>
+                  <Field label="YouTube reel URL">
+                    <input className="w-full rounded-md border bg-background px-3 py-2" value={form.youtube_url ?? ""} onChange={(e)=>setForm({...form, youtube_url: e.target.value})} />
+                  </Field>
+                </div>
                 <div className="flex justify-end">
                   <Button onClick={save} disabled={loading}>
                     {loading ? "Saving..." : "Save"}
@@ -401,8 +446,29 @@ export default function SettingsPage() {
                 <li className="text-muted-foreground">No applications yet.</li>
               )}
               {incoming.map((a) => (
-                <li key={a.id} className="py-1">
-                  {a.job_title} — {a.applicant_stack_user_id} — {a.status}
+                <li key={a.id} className="py-1 flex items-center justify-between gap-2">
+                  <span>
+                    {a.job_title} — {a.applicant_stack_user_id} — {a.status}
+                  </span>
+                  <span className="flex gap-1">
+                    {(["pending","interviewing","hired","rejected","completed"] as const).map((s)=> (
+                      <Button
+                        key={s}
+                        size="sm"
+                        variant={a.status===s? undefined: "outline"}
+                        onClick={async ()=>{
+                          try{
+                            await fetch(`/api/applications/${a.id}/status`,{
+                              method:"PATCH",
+                              headers:{"Content-Type":"application/json","x-user-id": user?.id||""},
+                              body: JSON.stringify({ status: s })
+                            });
+                            setIncoming((arr)=> arr.map((x)=> x.id===a.id? {...x, status:s}: x));
+                          }catch(e){}
+                        }}
+                      >{s}</Button>
+                    ))}
+                  </span>
                 </li>
               ))}
             </ul>
