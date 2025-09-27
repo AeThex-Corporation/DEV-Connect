@@ -433,6 +433,9 @@ export default function SettingsPage() {
           <div className="mt-2 text-sm text-muted-foreground">
             Your unique Passport ID verifies ownership of this account.
           </div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            Note: Passport is separate from the Verified Talent badge. Verification is granted independently.
+          </div>
           <PassportBlock userId={user?.id || ""} />
           <div className="mt-6 text-sm text-muted-foreground">
             Change your password (local accounts)
