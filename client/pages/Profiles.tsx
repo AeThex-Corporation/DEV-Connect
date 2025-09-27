@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/lib/fake-stack";
 
 interface ProfileListItem {
   stack_user_id: string;
@@ -12,6 +13,7 @@ interface ProfileListItem {
 }
 
 export default function ProfilesPage() {
+  const user = useUser();
   const [q, setQ] = useState("");
   const [role, setRole] = useState("");
   const [availability, setAvailability] = useState("");
@@ -36,6 +38,22 @@ export default function ProfilesPage() {
 
   return (
     <div>
+      {!user && (
+        <div className="rounded-xl border bg-card p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <div className="font-semibold">New here?</div>
+            <div className="text-sm text-muted-foreground">Create a profile to get discovered and message developers.</div>
+          </div>
+          <div className="flex gap-2">
+            <Button asChild>
+              <Link to="/onboarding">Create your profile</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+          </div>
+        </div>
+      )}
       <div className="rounded-xl border bg-card p-4 flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
           <input
