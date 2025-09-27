@@ -1,3 +1,4 @@
+import "./polyfills/process";
 import "./global.css";
 
 import { Toaster } from "@/components/ui/toaster";
