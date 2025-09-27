@@ -2,7 +2,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Briefcase, Home, Sparkles } from "lucide-react";
-import { UserButton, useUser } from "@stackframe/stack";
+import { UserStatus } from "./UserStatus";
 
 export function Layout() {
   return (
