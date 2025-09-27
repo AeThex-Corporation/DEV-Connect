@@ -56,7 +56,8 @@ export const listProfiles: RequestHandler = async (req, res) => {
       .filter(Boolean);
     if (arr.length) {
       params.push(arr);
-      clauses.push("tags && $" + params.length);
+      // require profile.tags to contain all requested tags
+      clauses.push("tags @> $" + params.length);
     }
   }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
@@ -82,14 +83,22 @@ export const upsertProfile: RequestHandler = async (req, res) => {
     trust_score,
     avatar_url,
     banner_url,
+    payment_pref,
+    devforum_url,
+    discord_handle,
+    roblox_user_id,
+    github_url,
+    artstation_url,
+    youtube_url,
+    roblox_game_url,
   } = req.body ?? {};
 
   if (!stack_user_id)
     return res.status(400).json({ error: "stack_user_id required" });
 
   const rows = await query(
-    `INSERT INTO profiles (stack_user_id, email, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, portfolio, trust_score, avatar_url, banner_url, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,COALESCE($10,'[]'::jsonb),COALESCE($11,0),$12,$13, now())
+    `INSERT INTO profiles (stack_user_id, email, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, portfolio, trust_score, avatar_url, banner_url, payment_pref, devforum_url, discord_handle, roblox_user_id, github_url, artstation_url, youtube_url, roblox_game_url, updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,COALESCE($10,'[]'::jsonb),COALESCE($11,0),$12,$13,$14,$15,$16,$17,$18,$19,$20,$21, now())
      ON CONFLICT (stack_user_id) DO UPDATE SET
        email = COALESCE(EXCLUDED.email, profiles.email),
        display_name = EXCLUDED.display_name,
@@ -103,8 +112,16 @@ export const upsertProfile: RequestHandler = async (req, res) => {
        trust_score = EXCLUDED.trust_score,
        avatar_url = EXCLUDED.avatar_url,
        banner_url = EXCLUDED.banner_url,
+       payment_pref = EXCLUDED.payment_pref,
+       devforum_url = EXCLUDED.devforum_url,
+       discord_handle = EXCLUDED.discord_handle,
+       roblox_user_id = EXCLUDED.roblox_user_id,
+       github_url = EXCLUDED.github_url,
+       artstation_url = EXCLUDED.artstation_url,
+       youtube_url = EXCLUDED.youtube_url,
+       roblox_game_url = EXCLUDED.roblox_game_url,
        updated_at = now()
-     RETURNING id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, passport_id, is_verified, created_at, updated_at`,
+     RETURNING id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, payment_pref, devforum_url, discord_handle, roblox_user_id, github_url, artstation_url, youtube_url, roblox_game_url, passport_id, is_verified, created_at, updated_at`,
     [
       stack_user_id,
       email ?? null,
@@ -119,6 +136,14 @@ export const upsertProfile: RequestHandler = async (req, res) => {
       typeof trust_score === "number" ? trust_score : null,
       avatar_url ?? null,
       banner_url ?? null,
+      payment_pref ?? null,
+      devforum_url ?? null,
+      discord_handle ?? null,
+      roblox_user_id ?? null,
+      github_url ?? null,
+      artstation_url ?? null,
+      youtube_url ?? null,
+      roblox_game_url ?? null,
     ],
   );
 
