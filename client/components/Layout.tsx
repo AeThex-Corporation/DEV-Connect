@@ -31,11 +31,21 @@ function SiteHeader() {
         setIncomingCount(0);
         return;
       }
-      const r = await fetch(
-        `/api/applications/incoming/count?owner=${encodeURIComponent(user.id)}`,
-      );
-      const d = await r.json();
-      setIncomingCount(d.count || 0);
+      try {
+        const r = await fetch(
+          `/api/applications/incoming/count?owner=${encodeURIComponent(user.id)}`,
+        );
+        if (!r.ok) {
+          console.warn("Failed to fetch incoming count", r.status);
+          setIncomingCount(0);
+          return;
+        }
+        const d = await r.json();
+        setIncomingCount(d.count || 0);
+      } catch (err) {
+        console.warn("Error fetching incoming count", err);
+        setIncomingCount(0);
+      }
     }
     load();
     t = setInterval(load, 30000);
@@ -132,16 +142,38 @@ function SiteFooter() {
   useEffect(() => {
     let t: any;
     async function ping() {
-      if (user?.id) {
-        await fetch(`/api/presence/ping`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ stack_user_id: user.id }),
-        });
+      try {
+        if (user?.id) {
+          try {
+            const resp = await fetch(`/api/presence/ping`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ stack_user_id: user.id }),
+            });
+            if (!resp.ok) {
+              console.warn("Presence ping failed", resp.status);
+            }
+          } catch (err) {
+            // Network or other error when sending presence ping
+            console.warn("Error sending presence ping", err);
+          }
+        }
+        try {
+          const r = await fetch(`/api/presence/online`);
+          if (!r.ok) {
+            console.warn("Failed to fetch online count", r.status);
+            setOnline(0);
+            return;
+          }
+          const d = await r.json();
+          setOnline(d.online || 0);
+        } catch (err) {
+          console.warn("Error fetching online count", err);
+          setOnline(0);
+        }
+      } catch (err) {
+        console.warn("Unexpected error in presence ping", err);
       }
-      const r = await fetch(`/api/presence/online`);
-      const d = await r.json();
-      setOnline(d.online || 0);
     }
     ping();
     t = setInterval(ping, 60000);
