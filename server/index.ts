@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { getMyProfile, upsertProfile } from "./routes/profiles";
+import { getMyProfile, getPublicProfile, listProfiles, upsertProfile } from "./routes/profiles";
 import { listJobs, createJob, getJob, applyToJob } from "./routes/jobs";
 import { listThread, sendMessage } from "./routes/messages";
 
