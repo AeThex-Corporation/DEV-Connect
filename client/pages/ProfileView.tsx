@@ -270,6 +270,19 @@ export default function ProfileView() {
           </div>
         </section>
       </div>
+
+      <section className="mt-6 rounded-xl border bg-card p-5">
+        <h2 className="font-semibold">Project history</h2>
+        {history.length === 0 ? (
+          <div className="mt-2 text-sm text-muted-foreground">No completed collaborations yet.</div>
+        ) : (
+          <ul className="mt-2 text-sm space-y-1">
+            {history.map((h)=> (
+              <li key={h.id}>#{h.job_id} · {h.title} · {h.completed_at ? new Date(h.completed_at).toLocaleDateString() : ""}</li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
