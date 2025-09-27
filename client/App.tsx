@@ -10,7 +10,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
 import Auth from "./pages/Auth";
-import Profile from "./pages/Profile";
+import MyProfileRedirect from "./pages/MyProfileRedirect";
 import Profiles from "./pages/Profiles";
 import ProfileView from "./pages/ProfileView";
 import Onboarding from "./pages/Onboarding";
