@@ -163,17 +163,17 @@ function SiteFooter() {
           <h4 className="font-semibold mb-3">Platform</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>
-              <Link to="/jobs" className="hover:text-foreground">
+              <Link to="/jobs" className="text-foreground/80 hover:text-foreground">
                 Browse jobs
               </Link>
             </li>
             <li>
-              <Link to="/profiles" className="hover:text-foreground">
+              <Link to="/profiles" className="text-foreground/80 hover:text-foreground">
                 Network
               </Link>
             </li>
             <li>
-              <Link to="/messages" className="hover:text-foreground">
+              <Link to="/messages" className="text-foreground/80 hover:text-foreground">
                 Messages
               </Link>
             </li>
