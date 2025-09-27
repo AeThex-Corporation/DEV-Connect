@@ -87,7 +87,7 @@ function SiteFooter() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/jobs" className="hover:text-foreground">Browse jobs</Link></li>
             <li><Link to="/profile" className="hover:text-foreground">Your profile</Link></li>
-            <li><span className="cursor-default select-none">Messages (soon)</span></li>
+            <li><Link to="/messages" className="hover:text-foreground">Messages</Link></li>
           </ul>
         </div>
         <div>
