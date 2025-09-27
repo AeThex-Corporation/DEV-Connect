@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Filter, Search } from "lucide-react";
 import { apiGet, apiPost, Job } from "@/services/api";
-import { useUser } from "@stackframe/stack";
+import { useUser } from "@/lib/fake-stack";
 
 export default function JobsInner() {
   const user = useUser();
