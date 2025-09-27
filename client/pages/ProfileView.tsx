@@ -55,6 +55,11 @@ export default function ProfileView() {
           const bl = await br.json();
           setBadges(Array.isArray(bl) ? bl : []);
         } catch (e) {}
+        try {
+          const hr = await fetch(`/api/history/${encodeURIComponent(stackUserId)}`);
+          const hv = await hr.json();
+          setHistory(Array.isArray(hv)? hv: []);
+        } catch (e) {}
       } catch (err) {
         console.warn("Error loading public profile", err);
         setP(null);
