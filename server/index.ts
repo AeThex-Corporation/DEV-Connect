@@ -39,5 +39,9 @@ export function createServer() {
   app.get("/api/messages", listThread);
   app.post("/api/messages", sendMessage);
 
+  // Favorites
+  app.get("/api/favorites", listFavorites);
+  app.post("/api/favorites/toggle", toggleFavorite);
+
   return app;
 }
