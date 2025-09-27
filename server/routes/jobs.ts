@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { query } from "../db";
 
 export const listJobs: RequestHandler = async (req, res) => {
-  const { role, comp, genre, q } = req.query as Record<
+  const { role, comp, genre, q, created_by } = req.query as Record<
     string,
     string | undefined
   >;
@@ -23,6 +23,10 @@ export const listJobs: RequestHandler = async (req, res) => {
   if (genre) {
     params.push(genre);
     clauses.push(`genre = $${params.length}`);
+  }
+  if (created_by) {
+    params.push(created_by);
+    clauses.push(`created_by = $${params.length}`);
   }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   const rows = await query(
