@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export default function AdminPage() {
   const user = useUser();
-  const [tab, setTab] = useState<"featured" | "tickets" | "reports">(
+  const [tab, setTab] = useState<"featured" | "tickets" | "reports" | "verification">(
     "featured",
   );
   const headers = useMemo(
@@ -44,11 +44,85 @@ export default function AdminPage() {
         >
           Reports
         </Button>
+        <Button
+          variant={tab === "verification" ? undefined : "outline"}
+          onClick={() => setTab("verification")}
+        >
+          Verification
+        </Button>
       </div>
       {tab === "featured" && <Featured headers={headers} />}
       {tab === "tickets" && <Tickets headers={headers} />}
       {tab === "reports" && <Reports headers={headers} />}
+      {tab === "verification" && <VerificationAdmin headers={headers} />}
     </div>
+  );
+}
+
+function VerificationAdmin({ headers }: { headers: Record<string, string> }) {
+  const [stackUserId, setStackUserId] = useState("");
+  const [profile, setProfile] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+  const load = async () => {
+    if (!stackUserId) return;
+    setLoading(true);
+    const p = await fetch(`/api/admin/profiles/${encodeURIComponent(stackUserId)}`, {
+      headers,
+    }).then((r) => r.json());
+    setProfile(p);
+    setLoading(false);
+  };
+  const setVerified = async (val: boolean) => {
+    if (!stackUserId) return;
+    setLoading(true);
+    const p = await fetch(
+      `/api/admin/profiles/${encodeURIComponent(stackUserId)}/verify`,
+      {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ is_verified: val }),
+      },
+    ).then((r) => r.json());
+    setProfile(p);
+    setLoading(false);
+  };
+  return (
+    <section className="rounded-xl border bg-card p-5">
+      <h2 className="font-semibold">Verification</h2>
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <input
+          className="rounded-md border bg-background px-3 py-2 text-sm sm:col-span-2"
+          placeholder="stack_user_id"
+          value={stackUserId}
+          onChange={(e) => setStackUserId(e.target.value)}
+        />
+        <Button onClick={load} disabled={!stackUserId || loading}>
+          {loading ? "Loading..." : "Load"}
+        </Button>
+      </div>
+      {profile && (
+        <div className="mt-4 text-sm flex items-center justify-between">
+          <div>
+            <div className="text-muted-foreground">{profile.stack_user_id}</div>
+            <div className="mt-1">
+              Status: {profile.is_verified ? "Verified" : "Not verified"}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setVerified(false)}
+              disabled={loading || !profile.is_verified}
+            >
+              Unverify
+            </Button>
+            <Button onClick={() => setVerified(true)} disabled={loading || profile.is_verified}>
+              Verify
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
