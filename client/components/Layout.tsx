@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Briefcase, Home, Sparkles } from "lucide-react";
 import { UserStatus } from "./UserStatus";
 import { useUser } from "@/lib/fake-stack";
+import { useEffect, useMemo, useState } from "react";
 
 export function Layout() {
   return (
@@ -20,6 +21,22 @@ export function Layout() {
 function SiteHeader() {
   const location = useLocation();
   const user = useUser();
+  const [incomingCount, setIncomingCount] = useState(0);
+  useEffect(() => {
+    let t: any;
+    async function load() {
+      if (!user) {
+        setIncomingCount(0);
+        return;
+      }
+      const r = await fetch(`/api/applications/incoming/count?owner=${encodeURIComponent(user.id)}`);
+      const d = await r.json();
+      setIncomingCount(d.count || 0);
+    }
+    load();
+    t = setInterval(load, 30000);
+    return () => clearInterval(t);
+  }, [user?.id]);
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -48,7 +65,7 @@ function SiteHeader() {
             icon={<Briefcase className="h-4 w-4" />}
             active={location.pathname.startsWith("/jobs")}
           >
-            Jobs
+            Jobs{user && incomingCount > 0 ? ` (${incomingCount})` : ""}
           </NavItem>
         </nav>
         <div className="flex items-center gap-2">
@@ -103,6 +120,22 @@ function NavItem({
 }
 
 function SiteFooter() {
+  const user = useUser();
+  const [online, setOnline] = useState(0);
+  useEffect(() => {
+    let t: any;
+    async function ping() {
+      if (user?.id) {
+        await fetch(`/api/presence/ping`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stack_user_id: user.id }) });
+      }
+      const r = await fetch(`/api/presence/online`);
+      const d = await r.json();
+      setOnline(d.online || 0);
+    }
+    ping();
+    t = setInterval(ping, 60000);
+    return () => clearInterval(t);
+  }, [user?.id]);
   return (
     <footer className="border-t bg-background">
       <div className="container px-4 sm:px-6 lg:px-8 py-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -158,7 +191,7 @@ function SiteFooter() {
         </div>
       </div>
       <div className="border-t py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} RBX Connect. All rights reserved.
+        {online} online • Developed & Powered By AeThex.Dev • © {new Date().getFullYear()} RBX Connect. All rights reserved.
       </div>
     </footer>
   );
