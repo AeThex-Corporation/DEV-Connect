@@ -6,9 +6,10 @@ export const submitReport: RequestHandler = async (req, res) => {
   const { subject, description } = req.body ?? {};
   if (!subject || !description)
     return res.status(400).json({ error: "subject and description required" });
-  await query(`INSERT INTO reports (subject, description) VALUES ($1,$2)`, [
-    subject,
-    description,
-  ]);
+  const supabase = getSupabase();
+  const { error } = await supabase
+    .from("reports")
+    .insert({ subject, description });
+  if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true });
 };
