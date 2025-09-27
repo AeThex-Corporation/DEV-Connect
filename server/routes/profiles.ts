@@ -70,6 +70,7 @@ export const listProfiles: RequestHandler = async (req, res) => {
 export const upsertProfile: RequestHandler = async (req, res) => {
   const {
     stack_user_id,
+    email,
     display_name,
     role,
     tags,
@@ -87,9 +88,10 @@ export const upsertProfile: RequestHandler = async (req, res) => {
     return res.status(400).json({ error: "stack_user_id required" });
 
   const rows = await query(
-    `INSERT INTO profiles (stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, portfolio, trust_score, avatar_url, banner_url, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,COALESCE($9,'[]'::jsonb),COALESCE($10,0),$11,$12, now())
+    `INSERT INTO profiles (stack_user_id, email, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, portfolio, trust_score, avatar_url, banner_url, updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,COALESCE($10,'[]'::jsonb),COALESCE($11,0),$12,$13, now())
      ON CONFLICT (stack_user_id) DO UPDATE SET
+       email = COALESCE(EXCLUDED.email, profiles.email),
        display_name = EXCLUDED.display_name,
        role = EXCLUDED.role,
        tags = EXCLUDED.tags,
@@ -105,6 +107,7 @@ export const upsertProfile: RequestHandler = async (req, res) => {
      RETURNING id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, avatar_url, banner_url, created_at, updated_at`,
     [
       stack_user_id,
+      email ?? null,
       display_name ?? null,
       role ?? null,
       Array.isArray(tags) ? tags : null,
