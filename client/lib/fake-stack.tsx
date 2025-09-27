@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getSupabase } from "./supabase";
 
 type User = { id: string; displayName?: string } | null;
 
@@ -17,6 +18,22 @@ export function FakeStackProvider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem("rbx_user");
       if (raw) setUser(JSON.parse(raw));
     } catch (e) {}
+    const sb = getSupabase();
+    if (!sb) return; // supabase not configured
+    sb.auth.getSession().then(({ data }) => {
+      const email = data.session?.user?.email || null;
+      const display = (data.session?.user?.user_metadata as any)?.name || email || undefined;
+      if (email) setUser({ id: `local:${email}`, displayName: display });
+    });
+    const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+      const email = session?.user?.email || null;
+      const display = (session?.user?.user_metadata as any)?.name || email || undefined;
+      if (email) setUser({ id: `local:${email}`, displayName: display });
+      else setUser(null);
+    });
+    return () => {
+      sub?.subscription?.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {

@@ -12,17 +12,23 @@ export default function AuthReset() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const r = await fetch("/api/auth/reset", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, new_password: password }),
-    });
-    if (!r.ok) {
-      setError((await r.json()).error || "Failed");
-      return;
+    try {
+      const sb = (await import("@/lib/supabase")).getSupabase();
+      if (sb) {
+        const { error } = await sb.auth.updateUser({ password });
+        if (error) throw error;
+      } else {
+        const r = await fetch("/api/auth/reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, new_password: password }),
+        });
+        if (!r.ok) throw new Error((await r.json()).error || "Failed");
+      }
+      nav("/auth");
+    } catch (err: any) {
+      setError(err.message || "Failed");
     }
-    // After reset, send user to sign in
-    nav("/auth");
   };
   return (
     <div className="mx-auto max-w-md rounded-xl border bg-card p-6 grid gap-3">

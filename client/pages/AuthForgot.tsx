@@ -7,17 +7,27 @@ export default function AuthForgot() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const r = await fetch("/api/auth/forgot", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    if (!r.ok) {
-      setError((await r.json()).error || "Failed");
-      return;
+    try {
+      const sb = (await import("@/lib/supabase")).getSupabase();
+      if (sb) {
+        const { error } = await sb.auth.resetPasswordForEmail(email, {
+          redirectTo: `${location.origin}/auth/reset`,
+        });
+        if (error) throw error;
+        setSent("sent");
+      } else {
+        const r = await fetch("/api/auth/forgot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        if (!r.ok) throw new Error((await r.json()).error || "Failed");
+        const data = await r.json();
+        setSent(data.token || "ok");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed");
     }
-    const data = await r.json();
-    setSent(data.token || "ok");
   };
   return (
     <div className="mx-auto max-w-md rounded-xl border bg-card p-6 grid gap-3">
