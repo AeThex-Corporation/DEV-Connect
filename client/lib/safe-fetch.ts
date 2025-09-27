@@ -3,26 +3,51 @@ export async function safeFetch(
   init?: RequestInit,
 ): Promise<Response | null> {
   if (typeof window === "undefined") return null;
-  const f: any = (window as any).fetch;
-  if (typeof f !== "function") {
+
+  const globalFetch: any = (window as any).fetch || (globalThis as any).fetch;
+  if (typeof globalFetch !== "function") {
     // fetch is not available
     // eslint-disable-next-line no-console
-    console.warn("fetch is not available on window");
+    console.warn("fetch is not available on window/globalThis");
     return null;
   }
+
+  // Be extremely defensive: some analytics wrappers may throw when called or return
+  // non-standard thenables that behave strangely. Ensure we never let an exception
+  // escape this helper.
   try {
-    // Some wrappers may throw synchronously when called; guard against that
-    const p = f.call(window, input, init);
-    if (!p || typeof p.then !== "function") {
-      // Not a promise
+    let p: any;
+    try {
+      p = globalFetch.call(window, input, init);
+    } catch (callErr) {
+      // Synchronous wrapper throw
+      // eslint-disable-next-line no-console
+      console.warn("safeFetch: fetch call threw synchronously", callErr);
       return null;
     }
-    const res = await p;
-    return res as Response;
+
+    // Coerce to a promise safely
+    let resolved: any;
+    try {
+      resolved = await Promise.resolve(p).catch((err) => {
+        // Fetch promise rejected (network error, CORS, etc.)
+        // eslint-disable-next-line no-console
+        console.warn("safeFetch: fetch promise rejected", err);
+        return null;
+      });
+    } catch (coerceErr) {
+      // Accessing then or other unexpected behavior
+      // eslint-disable-next-line no-console
+      console.warn("safeFetch: error awaiting fetch", coerceErr);
+      return null;
+    }
+
+    if (!resolved) return null;
+    return resolved as Response;
   } catch (err) {
-    // Network error or wrapper threw
+    // Catch-all guard
     // eslint-disable-next-line no-console
-    console.warn("safeFetch error", err);
+    console.warn("safeFetch unexpected error", err);
     return null;
   }
 }
