@@ -153,8 +153,8 @@ export default function SettingsPage() {
                       e.currentTarget.value = "";
                     }}
                   />
-                  <Button asChild variant="outline" size="sm">
-                    <span>Upload avatar</span>
+                  <Button variant="outline" size="sm" type="button">
+                    Upload avatar
                   </Button>
                 </label>
               </div>
