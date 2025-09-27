@@ -8,7 +8,7 @@ import {
   listProfiles,
   upsertProfile,
 } from "./routes/profiles";
-import { listJobs, createJob, getJob, applyToJob } from "./routes/jobs";
+import { listJobs, createJob, getJob, applyToJob, listIncomingApplications } from "./routes/jobs";
 import { listThread, sendMessage } from "./routes/messages";
 import { listFavorites, toggleFavorite } from "./routes/favorites";
 import { submitReport } from "./routes/reports";
@@ -193,6 +193,9 @@ export function createServer() {
   // Messages
   app.get("/api/messages", listThread);
   app.post("/api/messages", sendMessage);
+
+  // Applications
+  app.get("/api/applications/incoming", listIncomingApplications);
 
   // Favorites
   app.get("/api/favorites", listFavorites);
