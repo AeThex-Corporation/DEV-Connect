@@ -11,7 +11,7 @@ export function Layout() {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 text-foreground">
       <SiteHeader />
       <main className="container px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-page-fade">
+        <div key={location.pathname} className="animate-page-fade">
           <Outlet />
         </div>
       </main>
