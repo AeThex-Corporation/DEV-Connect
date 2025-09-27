@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { getMyProfile, upsertProfile } from "./routes/profiles";
+import { listJobs, createJob, getJob, applyToJob } from "./routes/jobs";
+import { listThread, sendMessage } from "./routes/messages";
 
 export function createServer() {
   const app = express();
@@ -23,6 +25,16 @@ export function createServer() {
   // Profiles
   app.get("/api/profile/me", getMyProfile);
   app.post("/api/profile", upsertProfile);
+
+  // Jobs
+  app.get("/api/jobs", listJobs);
+  app.post("/api/jobs", createJob);
+  app.get("/api/jobs/:id", getJob);
+  app.post("/api/jobs/:id/apply", applyToJob);
+
+  // Messages
+  app.get("/api/messages", listThread);
+  app.post("/api/messages", sendMessage);
 
   return app;
 }
