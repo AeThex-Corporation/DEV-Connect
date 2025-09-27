@@ -10,6 +10,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
 import Auth from "./pages/Auth";
+import AuthForgot from "./pages/AuthForgot";
+import AuthReset from "./pages/AuthReset";
 import AuthSuccess from "./pages/AuthSuccess";
 import MyProfileRedirect from "./pages/MyProfileRedirect";
 import Profiles from "./pages/Profiles";
@@ -43,6 +45,8 @@ const App = () => (
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/auth/success" element={<AuthSuccess />} />
+                <Route path="/auth/forgot" element={<AuthForgot />} />
+                <Route path="/auth/reset" element={<AuthReset />} />
                 <Route path="/profile" element={<MyProfileRedirect />} />
                 <Route path="/profiles" element={<Profiles />} />
                 <Route path="/network" element={<Profiles />} />
