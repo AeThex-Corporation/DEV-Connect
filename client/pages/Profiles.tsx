@@ -19,6 +19,21 @@ export default function ProfilesPage() {
   const [availability, setAvailability] = useState("");
   const [items, setItems] = useState<ProfileListItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [incomplete, setIncomplete] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      if (!user) {
+        setIncomplete(false);
+        return;
+      }
+      const r = await fetch(`/api/profile/me?stackUserId=${encodeURIComponent(user.id)}`);
+      const data = await r.json();
+      const hasRole = !!data?.role;
+      const hasTags = Array.isArray(data?.tags) && data.tags.length > 0;
+      setIncomplete(!(hasRole && hasTags));
+    })();
+  }, [user]);
 
   const load = async () => {
     setLoading(true);
@@ -50,6 +65,19 @@ export default function ProfilesPage() {
             </Button>
             <Button asChild variant="outline">
               <Link to="/auth">Sign in</Link>
+            </Button>
+          </div>
+        </div>
+      )}
+      {user && incomplete && (
+        <div className="rounded-xl border bg-card p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <div className="font-semibold">Finish setting up your profile</div>
+            <div className="text-sm text-muted-foreground">Add your role and a few tags to help others find you.</div>
+          </div>
+          <div className="flex gap-2">
+            <Button asChild>
+              <Link to="/settings">Set up profile</Link>
             </Button>
           </div>
         </div>
