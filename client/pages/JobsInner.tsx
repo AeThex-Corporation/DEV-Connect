@@ -72,7 +72,7 @@ export default function JobsInner() {
             setGenre(null);
             setExcludeRev(false);
             setQuery("");
-            load();
+            setTimeout(load, 0);
           }}
         >
           Reset
