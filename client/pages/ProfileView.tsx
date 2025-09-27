@@ -27,10 +27,23 @@ export default function ProfileView() {
   useEffect(() => {
     if (!stackUserId) return;
     setLoading(true);
-    fetch(`/api/profile/${encodeURIComponent(stackUserId)}`)
-      .then((r) => r.json())
-      .then(setP)
-      .finally(() => setLoading(false));
+    (async () => {
+      try {
+        const r = await fetch(`/api/profile/${encodeURIComponent(stackUserId)}`);
+        if (!r.ok) {
+          console.warn("Failed to load public profile", r.status);
+          setP(null);
+          return;
+        }
+        const d = await r.json();
+        setP(d);
+      } catch (err) {
+        console.warn("Error loading public profile", err);
+        setP(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [stackUserId]);
 
   if (loading)
@@ -53,16 +66,21 @@ export default function ProfileView() {
   const tags = p.tags ?? [];
 
   async function favorite() {
-    await fetch("/api/favorites/toggle", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        favorite_stack_user_id: p!.stack_user_id,
-        stack_user_id: localStorage.getItem("rbx_user")
-          ? JSON.parse(localStorage.getItem("rbx_user") as string).id
-          : "",
-      }),
-    });
+    try {
+      const r = await fetch("/api/favorites/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          favorite_stack_user_id: p!.stack_user_id,
+          stack_user_id: localStorage.getItem("rbx_user")
+            ? JSON.parse(localStorage.getItem("rbx_user") as string).id
+            : "",
+        }),
+      });
+      if (!r.ok) console.warn("Failed to toggle favorite", r.status);
+    } catch (err) {
+      console.warn("Error toggling favorite", err);
+    }
   }
 
   async function connect() {
