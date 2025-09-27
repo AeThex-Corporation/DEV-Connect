@@ -9,7 +9,13 @@ function isAdmin(id: string | undefined): boolean {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  return !!(id && list.includes(id));
+  if (!id) return false;
+  if (list.includes(id)) return true;
+  if (id.startsWith("local:")) {
+    const email = id.slice("local:".length);
+    if (list.includes(email)) return true;
+  }
+  return false;
 }
 
 const requireAdmin: RequestHandler = (req, res, next) => {
