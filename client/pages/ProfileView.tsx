@@ -189,9 +189,29 @@ export default function ProfileView() {
           <div className="mt-3 text-sm text-muted-foreground">
             Availability: {p.availability ?? "—"}
           </div>
+          <div className="mt-2 text-sm text-muted-foreground">
+            Payment preference: {p.payment_pref ?? "—"}
+          </div>
           <div className="mt-3 text-xs text-muted-foreground">
             Passport ID:{" "}
             <span className="font-mono select-all">{p.passport_id || "—"}</span>
+          </div>
+          <div className="mt-3 grid sm:grid-cols-2 gap-2 text-sm">
+            {p.roblox_game_url && (
+              <a className="underline" href={p.roblox_game_url} target="_blank" rel="noreferrer">Roblox game</a>
+            )}
+            {p.devforum_url && (
+              <a className="underline" href={p.devforum_url} target="_blank" rel="noreferrer">DevForum</a>
+            )}
+            {p.github_url && (
+              <a className="underline" href={p.github_url} target="_blank" rel="noreferrer">GitHub</a>
+            )}
+            {p.artstation_url && (
+              <a className="underline" href={p.artstation_url} target="_blank" rel="noreferrer">ArtStation</a>
+            )}
+            {p.youtube_url && (
+              <a className="underline" href={p.youtube_url} target="_blank" rel="noreferrer">YouTube</a>
+            )}
           </div>
         </section>
         <section className="rounded-xl border bg-card p-5">
