@@ -11,6 +11,7 @@ export default function JobsInner() {
   const [role, setRole] = useState<string | null>(null);
   const [comp, setComp] = useState<string | null>(null);
   const [genre, setGenre] = useState<string | null>(null);
+  const [excludeRev, setExcludeRev] = useState(false);
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
@@ -22,6 +23,7 @@ export default function JobsInner() {
     if (role) params.set("role", role);
     if (comp) params.set("comp", comp);
     if (genre) params.set("genre", genre);
+    if (excludeRev) params.set("exclude_revshare", "1");
     const data = await apiGet<Job[]>(`/api/jobs?${params.toString()}`);
     setJobs(data);
     setLoading(false);
@@ -57,6 +59,10 @@ export default function JobsInner() {
           onChange={setGenre}
           options={["Simulator", "FPS", "Adventure", "RPG"]}
         />
+        <label className="mt-3 flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={excludeRev} onChange={(e)=> setExcludeRev(e.target.checked)} />
+          Exclude Rev-Share
+        </label>
         <Button
           variant="ghost"
           className="w-full mt-2"
@@ -64,6 +70,7 @@ export default function JobsInner() {
             setRole(null);
             setComp(null);
             setGenre(null);
+            setExcludeRev(false);
             setQuery("");
             load();
           }}
