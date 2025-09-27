@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useUser } from "@stackframe/stack";
+import { useUser } from "@/lib/fake-stack";
 import { Button } from "@/components/ui/button";
 import { apiGet, apiPost, Message } from "@/services/api";
 
