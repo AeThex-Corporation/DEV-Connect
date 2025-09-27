@@ -7,14 +7,22 @@ export default function ModerationPage() {
   const [sent, setSent] = useState(false);
 
   const submit = async () => {
-    await fetch("/api/report", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subject, description }),
-    });
-    setSent(true);
-    setSubject("");
-    setDescription("");
+    try {
+      const r = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject, description }),
+      });
+      if (!r.ok) {
+        console.warn("Report submission failed", r.status);
+        return;
+      }
+      setSent(true);
+      setSubject("");
+      setDescription("");
+    } catch (err) {
+      console.warn("Error submitting report", err);
+    }
   };
 
   return (
