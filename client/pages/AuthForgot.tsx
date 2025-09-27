@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { safeFetch } from "@/lib/safe-fetch";
 
 export default function AuthForgot() {
   const [email, setEmail] = useState("");
@@ -16,12 +17,20 @@ export default function AuthForgot() {
         if (error) throw error;
         setSent("sent");
       } else {
-        const r = await fetch("/api/auth/forgot", {
+        const r = await safeFetch("/api/auth/forgot", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
         });
-        if (!r.ok) throw new Error((await r.json()).error || "Failed");
+        if (!r) throw new Error("Network error while sending reset request");
+        if (!r.ok) {
+          let errMsg = "Failed";
+          try {
+            const body = await r.json();
+            errMsg = body.error || body.message || errMsg;
+          } catch (e) {}
+          throw new Error(errMsg);
+        }
         const data = await r.json();
         setSent(data.token || "ok");
       }
