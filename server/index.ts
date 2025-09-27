@@ -20,6 +20,8 @@ export function createServer() {
 
   // Auth router (includes session and passport)
   app.use("/api", authRouter);
+  app.post("/api/auth/signup", signup);
+  app.post("/api/auth/login", login);
 
   // Example API routes
   app.get("/api/ping", (_req, res) => {
