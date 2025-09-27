@@ -3,7 +3,8 @@ import { query } from "../db";
 
 export const getMyProfile: RequestHandler = async (req, res) => {
   const stackUserId = (req.query.stackUserId as string) || "";
-  if (!stackUserId) return res.status(400).json({ error: "stackUserId required" });
+  if (!stackUserId)
+    return res.status(400).json({ error: "stackUserId required" });
   const rows = await query(
     `SELECT id, stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, trust_score, portfolio, created_at, updated_at FROM profiles WHERE stack_user_id = $1 LIMIT 1`,
     [stackUserId],
@@ -25,7 +26,8 @@ export const upsertProfile: RequestHandler = async (req, res) => {
     trust_score,
   } = req.body ?? {};
 
-  if (!stack_user_id) return res.status(400).json({ error: "stack_user_id required" });
+  if (!stack_user_id)
+    return res.status(400).json({ error: "stack_user_id required" });
 
   const rows = await query(
     `INSERT INTO profiles (stack_user_id, display_name, role, tags, contact_discord, contact_roblox, contact_twitter, availability, portfolio, trust_score, updated_at)

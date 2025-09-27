@@ -1,6 +1,14 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { BadgeCheck, Star, Shield, Search, Sparkles, Clock, MessageSquare } from "lucide-react";
+import {
+  BadgeCheck,
+  Star,
+  Shield,
+  Search,
+  Sparkles,
+  Clock,
+  MessageSquare,
+} from "lucide-react";
 
 export default function Index() {
   return (
@@ -28,25 +36,52 @@ function HeroSection() {
           Connect with the right Roblox talent. Build faster.
         </h1>
         <p className="mt-4 text-muted-foreground text-lg">
-          Showcase your skills and portfolio, find filterable paid work, and chat securely—all in one place.
+          Showcase your skills and portfolio, find filterable paid work, and
+          chat securely—all in one place.
         </p>
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
-          <Button asChild size="lg" className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90">
+          <Button
+            asChild
+            size="lg"
+            className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90"
+          >
             <Link to="/jobs">Browse jobs</Link>
           </Button>
-          <Button size="lg" variant="outline">Create your profile</Button>
+          <Button size="lg" variant="outline">
+            Create your profile
+          </Button>
         </div>
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
-        <Stat title="Verified talent" value="1,200+" icon={<BadgeCheck className="h-4 w-4 text-primary" />} />
-        <Stat title="Active jobs" value="340" icon={<Search className="h-4 w-4 text-primary" />} />
-        <Stat title="Avg. response" value="< 24h" icon={<Clock className="h-4 w-4 text-primary" />} />
+        <Stat
+          title="Verified talent"
+          value="1,200+"
+          icon={<BadgeCheck className="h-4 w-4 text-primary" />}
+        />
+        <Stat
+          title="Active jobs"
+          value="340"
+          icon={<Search className="h-4 w-4 text-primary" />}
+        />
+        <Stat
+          title="Avg. response"
+          value="< 24h"
+          icon={<Clock className="h-4 w-4 text-primary" />}
+        />
       </div>
     </section>
   );
 }
 
-function Stat({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
+function Stat({
+  title,
+  value,
+  icon,
+}: {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+}) {
   return (
     <div className="rounded-xl border bg-card text-card-foreground p-4 flex items-center gap-4">
       <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -81,10 +116,16 @@ function KeyPillars() {
   return (
     <section>
       <h2 className="text-2xl sm:text-3xl font-bold">MVP essentials</h2>
-      <p className="text-muted-foreground mt-2">Everything you need to launch: comprehensive profiles, clear job listings, and basic DMs.</p>
+      <p className="text-muted-foreground mt-2">
+        Everything you need to launch: comprehensive profiles, clear job
+        listings, and basic DMs.
+      </p>
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         {items.map((it) => (
-          <div key={it.title} className="rounded-xl border p-5 bg-card text-card-foreground">
+          <div
+            key={it.title}
+            className="rounded-xl border p-5 bg-card text-card-foreground"
+          >
             <div className="inline-flex items-center justify-center rounded-md bg-primary/10 text-primary h-10 w-10">
               {it.icon}
             </div>
@@ -123,7 +164,9 @@ function FeaturedProfiles() {
       <div className="flex items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold">Featured talent</h2>
-          <p className="text-muted-foreground mt-2">Explore verified developers with strong portfolios and ratings.</p>
+          <p className="text-muted-foreground mt-2">
+            Explore verified developers with strong portfolios and ratings.
+          </p>
         </div>
         <Button asChild variant="outline">
           <Link to="/jobs">Hire talent</Link>
@@ -137,11 +180,18 @@ function FeaturedProfiles() {
                 <h3 className="font-semibold">{p.name}</h3>
                 <p className="text-sm text-muted-foreground">{p.role}</p>
               </div>
-              <span className="text-xs rounded-full px-2 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20">{p.status}</span>
+              <span className="text-xs rounded-full px-2 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20">
+                {p.status}
+              </span>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {p.tags.map((t) => (
-                <span key={t} className="text-xs rounded-md px-2 py-1 bg-muted text-muted-foreground">{t}</span>
+                <span
+                  key={t}
+                  className="text-xs rounded-md px-2 py-1 bg-muted text-muted-foreground"
+                >
+                  {t}
+                </span>
               ))}
             </div>
             <div className="mt-4 flex items-center gap-1 text-amber-500">
@@ -164,15 +214,27 @@ function FeaturedJobs() {
       genre: "Simulator",
       scope: "Long-term",
     },
-    { title: "Terrain Artist", comp: "Fixed Robux", genre: "Adventure", scope: "Small task" },
-    { title: "UI/UX Designer", comp: "Rev Share", genre: "FPS", scope: "Full Game" },
+    {
+      title: "Terrain Artist",
+      comp: "Fixed Robux",
+      genre: "Adventure",
+      scope: "Small task",
+    },
+    {
+      title: "UI/UX Designer",
+      comp: "Rev Share",
+      genre: "FPS",
+      scope: "Full Game",
+    },
   ];
   return (
     <section>
       <div className="flex items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold">Hot jobs</h2>
-          <p className="text-muted-foreground mt-2">Pay type is always visible. Filter by role, genre, and experience.</p>
+          <p className="text-muted-foreground mt-2">
+            Pay type is always visible. Filter by role, genre, and experience.
+          </p>
         </div>
         <Button asChild>
           <Link to="/jobs">Browse all jobs</Link>
@@ -183,9 +245,18 @@ function FeaturedJobs() {
           <article key={j.title} className="rounded-xl border bg-card p-5">
             <h3 className="font-semibold">{j.title}</h3>
             <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
-              <div><dt className="text-muted-foreground">Compensation</dt><dd>{j.comp}</dd></div>
-              <div><dt className="text-muted-foreground">Genre</dt><dd>{j.genre}</dd></div>
-              <div><dt className="text-muted-foreground">Scope</dt><dd>{j.scope}</dd></div>
+              <div>
+                <dt className="text-muted-foreground">Compensation</dt>
+                <dd>{j.comp}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Genre</dt>
+                <dd>{j.genre}</dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">Scope</dt>
+                <dd>{j.scope}</dd>
+              </div>
             </dl>
             <Button asChild variant="outline" className="mt-4">
               <Link to="/jobs">Apply</Link>
@@ -199,9 +270,21 @@ function FeaturedJobs() {
 
 function TrustSafety() {
   const items = [
-    { title: "Verification", desc: "Link DevForum or Roblox ID to build a trust score.", icon: <Shield className="h-5 w-5" /> },
-    { title: "Ratings & reviews", desc: "Leave feedback after completed contracts.", icon: <Star className="h-5 w-5" /> },
-    { title: "Reporting & moderation", desc: "Report scams or exploitative posts for review.", icon: <Shield className="h-5 w-5" /> },
+    {
+      title: "Verification",
+      desc: "Link DevForum or Roblox ID to build a trust score.",
+      icon: <Shield className="h-5 w-5" />,
+    },
+    {
+      title: "Ratings & reviews",
+      desc: "Leave feedback after completed contracts.",
+      icon: <Star className="h-5 w-5" />,
+    },
+    {
+      title: "Reporting & moderation",
+      desc: "Report scams or exploitative posts for review.",
+      icon: <Shield className="h-5 w-5" />,
+    },
   ];
   return (
     <section className="rounded-2xl border bg-card p-6 sm:p-8">
@@ -223,13 +306,19 @@ function TrustSafety() {
 function CTASection() {
   return (
     <section className="text-center">
-      <h2 className="text-3xl font-bold">Ready to find your next collaborator?</h2>
-      <p className="mt-2 text-muted-foreground">Create a profile or browse jobs with clear compensation and scope.</p>
+      <h2 className="text-3xl font-bold">
+        Ready to find your next collaborator?
+      </h2>
+      <p className="mt-2 text-muted-foreground">
+        Create a profile or browse jobs with clear compensation and scope.
+      </p>
       <div className="mt-5 flex items-center justify-center gap-3">
         <Button asChild size="lg">
           <Link to="/jobs">Browse jobs</Link>
         </Button>
-        <Button size="lg" variant="outline">Create profile</Button>
+        <Button size="lg" variant="outline">
+          Create profile
+        </Button>
       </div>
     </section>
   );

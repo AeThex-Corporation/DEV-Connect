@@ -28,28 +28,53 @@ function SiteHeader() {
           <span className="tracking-tight">RBX Connect</span>
         </Link>
         <nav className="hidden md:flex items-center gap-1">
-          <NavItem to="/" icon={<Home className="h-4 w-4" />}
-            active={location.pathname === "/"}>Home</NavItem>
-          <NavItem to="/jobs" icon={<Briefcase className="h-4 w-4" />}
-            active={location.pathname.startsWith("/jobs")}>Jobs</NavItem>
+          <NavItem
+            to="/"
+            icon={<Home className="h-4 w-4" />}
+            active={location.pathname === "/"}
+          >
+            Home
+          </NavItem>
+          <NavItem
+            to="/jobs"
+            icon={<Briefcase className="h-4 w-4" />}
+            active={location.pathname.startsWith("/jobs")}
+          >
+            Jobs
+          </NavItem>
         </nav>
         <div className="flex items-center gap-2">
           <UserStatus />
-          <Button asChild className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90"><Link to="/jobs">Post a job</Link></Button>
+          <Button
+            asChild
+            className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90"
+          >
+            <Link to="/jobs">Post a job</Link>
+          </Button>
         </div>
       </div>
     </header>
   );
 }
 
-function NavItem({ to, children, icon, active }: { to: string; children: React.ReactNode; icon?: React.ReactNode; active?: boolean }) {
+function NavItem({
+  to,
+  children,
+  icon,
+  active,
+}: {
+  to: string;
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+  active?: boolean;
+}) {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
         cn(
           "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-          (isActive || active)
+          isActive || active
             ? "bg-accent text-accent-foreground"
             : "text-muted-foreground hover:text-foreground hover:bg-accent",
         )
@@ -72,14 +97,29 @@ function SiteFooter() {
             </span>
             RBX Connect
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">Connecting Roblox developers and teams with clarity, trust, and great projects.</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Connecting Roblox developers and teams with clarity, trust, and
+            great projects.
+          </p>
         </div>
         <div>
           <h4 className="font-semibold mb-3">Platform</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/jobs" className="hover:text-foreground">Browse jobs</Link></li>
-            <li><Link to="/profile" className="hover:text-foreground">Your profile</Link></li>
-            <li><Link to="/messages" className="hover:text-foreground">Messages</Link></li>
+            <li>
+              <Link to="/jobs" className="hover:text-foreground">
+                Browse jobs
+              </Link>
+            </li>
+            <li>
+              <Link to="/profile" className="hover:text-foreground">
+                Your profile
+              </Link>
+            </li>
+            <li>
+              <Link to="/messages" className="hover:text-foreground">
+                Messages
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
@@ -95,7 +135,9 @@ function SiteFooter() {
           <p className="text-sm text-muted-foreground">Discord: @rbxconnect</p>
         </div>
       </div>
-      <div className="border-t py-4 text-center text-xs text-muted-foreground">© {new Date().getFullYear()} RBX Connect. All rights reserved.</div>
+      <div className="border-t py-4 text-center text-xs text-muted-foreground">
+        © {new Date().getFullYear()} RBX Connect. All rights reserved.
+      </div>
     </footer>
   );
 }

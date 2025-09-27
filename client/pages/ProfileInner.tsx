@@ -46,7 +46,9 @@ export default function ProfileInner() {
   if (!user) {
     return (
       <div className="text-center">
-        <p className="text-muted-foreground">Please sign in to edit your profile.</p>
+        <p className="text-muted-foreground">
+          Please sign in to edit your profile.
+        </p>
       </div>
     );
   }
@@ -68,32 +70,89 @@ export default function ProfileInner() {
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Your Profile</h1>
-          <p className="text-sm text-muted-foreground">Showcase your skills and how to contact you.</p>
+          <p className="text-sm text-muted-foreground">
+            Showcase your skills and how to contact you.
+          </p>
         </div>
         <div className="grid gap-4 rounded-xl border bg-card p-5">
           <Field label="Display name">
-            <input className="w-full rounded-md border bg-background px-3 py-2" value={form.display_name ?? ""} onChange={(e)=>setForm({ ...form!, display_name: e.target.value })} />
+            <input
+              className="w-full rounded-md border bg-background px-3 py-2"
+              value={form.display_name ?? ""}
+              onChange={(e) =>
+                setForm({ ...form!, display_name: e.target.value })
+              }
+            />
           </Field>
           <Field label="Role">
-            <input className="w-full rounded-md border bg-background px-3 py-2" value={form.role ?? ""} onChange={(e)=>setForm({ ...form!, role: e.target.value })} placeholder="Scripter, Builder, Designer..." />
+            <input
+              className="w-full rounded-md border bg-background px-3 py-2"
+              value={form.role ?? ""}
+              onChange={(e) => setForm({ ...form!, role: e.target.value })}
+              placeholder="Scripter, Builder, Designer..."
+            />
           </Field>
           <Field label="Tags (comma separated)">
-            <input className="w-full rounded-md border bg-background px-3 py-2" value={(form.tags ?? []).join(", ")} onChange={(e)=>setForm({ ...form!, tags: e.target.value.split(",").map(s=>s.trim()).filter(Boolean) })} />
+            <input
+              className="w-full rounded-md border bg-background px-3 py-2"
+              value={(form.tags ?? []).join(", ")}
+              onChange={(e) =>
+                setForm({
+                  ...form!,
+                  tags: e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean),
+                })
+              }
+            />
           </Field>
           <div className="grid sm:grid-cols-3 gap-3">
-            <Field label="Discord"><input className="w-full rounded-md border bg-background px-3 py-2" value={form.contact_discord ?? ""} onChange={(e)=>setForm({ ...form!, contact_discord: e.target.value })} /></Field>
-            <Field label="Roblox ID"><input className="w-full rounded-md border bg-background px-3 py-2" value={form.contact_roblox ?? ""} onChange={(e)=>setForm({ ...form!, contact_roblox: e.target.value })} /></Field>
-            <Field label="Twitter"><input className="w-full rounded-md border bg-background px-3 py-2" value={form.contact_twitter ?? ""} onChange={(e)=>setForm({ ...form!, contact_twitter: e.target.value })} /></Field>
+            <Field label="Discord">
+              <input
+                className="w-full rounded-md border bg-background px-3 py-2"
+                value={form.contact_discord ?? ""}
+                onChange={(e) =>
+                  setForm({ ...form!, contact_discord: e.target.value })
+                }
+              />
+            </Field>
+            <Field label="Roblox ID">
+              <input
+                className="w-full rounded-md border bg-background px-3 py-2"
+                value={form.contact_roblox ?? ""}
+                onChange={(e) =>
+                  setForm({ ...form!, contact_roblox: e.target.value })
+                }
+              />
+            </Field>
+            <Field label="Twitter">
+              <input
+                className="w-full rounded-md border bg-background px-3 py-2"
+                value={form.contact_twitter ?? ""}
+                onChange={(e) =>
+                  setForm({ ...form!, contact_twitter: e.target.value })
+                }
+              />
+            </Field>
           </div>
           <Field label="Availability">
-            <select className="w-full rounded-md border bg-background px-3 py-2" value={form.availability ?? "Open to Work"} onChange={(e)=>setForm({ ...form!, availability: e.target.value })}>
+            <select
+              className="w-full rounded-md border bg-background px-3 py-2"
+              value={form.availability ?? "Open to Work"}
+              onChange={(e) =>
+                setForm({ ...form!, availability: e.target.value })
+              }
+            >
               <option>Open to Work</option>
               <option>Only Networking</option>
               <option>Unavailable</option>
             </select>
           </Field>
           <div className="flex justify-end">
-            <Button onClick={save} disabled={loading}>{loading ? "Saving..." : "Save"}</Button>
+            <Button onClick={save} disabled={loading}>
+              {loading ? "Saving..." : "Save"}
+            </Button>
           </div>
         </div>
       </div>
@@ -101,7 +160,13 @@ export default function ProfileInner() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="grid gap-1 text-sm">
       <span className="text-muted-foreground">{label}</span>

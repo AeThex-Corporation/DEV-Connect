@@ -1,6 +1,8 @@
 // Ensure `process` exists in browser to avoid packages that reference process at module-eval time
 declare global {
-  interface Window { process?: any }
+  interface Window {
+    process?: any;
+  }
   var process: any;
 }
 

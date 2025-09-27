@@ -7,12 +7,19 @@ export default function UserStatusInner() {
   if (user) {
     return (
       <>
-        <Link to="/profile" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground">Profile</Link>
+        <Link
+          to="/profile"
+          className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground"
+        >
+          Profile
+        </Link>
         <UserButton />
       </>
     );
   }
   return (
-    <Link to="/auth" className="hidden sm:inline text-sm underline">Sign in</Link>
+    <Link to="/auth" className="hidden sm:inline text-sm underline">
+      Sign in
+    </Link>
   );
 }
