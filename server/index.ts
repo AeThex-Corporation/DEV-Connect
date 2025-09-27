@@ -5,6 +5,7 @@ import { handleDemo } from "./routes/demo";
 import { getMyProfile, getPublicProfile, listProfiles, upsertProfile } from "./routes/profiles";
 import { listJobs, createJob, getJob, applyToJob } from "./routes/jobs";
 import { listThread, sendMessage } from "./routes/messages";
+import { listFavorites, toggleFavorite } from "./routes/favorites";
 
 export function createServer() {
   const app = express();
