@@ -28,10 +28,14 @@ import {
   resetPassword,
 } from "./routes/auth-local";
 import { query } from "./db";
+import { getSupabase } from "./supabase";
 import adminRouter from "./routes/admin";
 import { listFeaturedDevs, listFeaturedJobs } from "./routes/featured";
 
 async function ensureSchema() {
+  // If Supabase is configured, assume schema is managed there
+  if (process.env.SUPABASE_URL) return;
+  // Otherwise, ensure local Postgres schema (development fallback)
   // Profiles
   await query(
     `CREATE TABLE IF NOT EXISTS profiles (
@@ -266,26 +270,29 @@ export function createServer() {
   // Public badges API
   app.get("/api/badges/:stackUserId", async (req, res) => {
     const { stackUserId } = req.params as { stackUserId: string };
-    const rows = await query(
-      `SELECT id, stack_user_id, slug, label, icon, color, created_at
-       FROM profile_badges WHERE stack_user_id=$1 ORDER BY created_at DESC`,
-      [stackUserId],
-    );
-    res.json(rows);
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("profile_badges")
+      .select("id, stack_user_id, slug, label, icon, color, created_at")
+      .eq("stack_user_id", stackUserId)
+      .order("created_at", { ascending: false });
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data ?? []);
   });
 
   // Public ratings API
   app.get("/api/ratings/:stackUserId", async (req, res) => {
     const { stackUserId } = req.params as { stackUserId: string };
-    const rows = await query<{ avg: string; count: string }>(
-      `SELECT COALESCE(AVG(score),0)::text as avg, COUNT(*)::text as count
-       FROM ratings WHERE ratee_stack_user_id=$1`,
-      [stackUserId],
-    );
-    res.json({
-      average: Number(rows[0]?.avg || 0),
-      count: Number(rows[0]?.count || 0),
-    });
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("ratings")
+      .select("score")
+      .eq("ratee_stack_user_id", stackUserId);
+    if (error) return res.status(500).json({ error: error.message });
+    const scores = (data || []).map((r: any) => r.score as number);
+    const count = scores.length;
+    const average = count ? scores.reduce((a, b) => a + b, 0) / count : 0;
+    res.json({ average, count });
   });
 
   app.post("/api/ratings", async (req, res) => {
@@ -293,31 +300,38 @@ export function createServer() {
       req.body ?? {};
     if (!rater_stack_user_id || !ratee_stack_user_id || !score)
       return res.status(400).json({ error: "rater, ratee and score required" });
-    const rel = await query<{ cnt: string }>(
-      `SELECT COUNT(*)::text as cnt
-       FROM applications a
-       JOIN jobs j ON j.id = a.job_id
-       WHERE (
-         (a.applicant_stack_user_id=$1 AND j.created_by=$2)
-         OR
-         (a.applicant_stack_user_id=$2 AND j.created_by=$1)
-       ) AND a.status IN ('hired','completed')`,
-      [rater_stack_user_id, ratee_stack_user_id],
-    );
-    if (Number(rel[0]?.cnt || 0) === 0) {
+    const supabase = getSupabase();
+    // Check collaboration relation
+    const { data: rel, error: relErr } = await supabase
+      .from("applications")
+      .select("id, status, jobs:job_id(created_by)")
+      .or(
+        `and(applicant_stack_user_id.eq.${rater_stack_user_id},jobs.created_by.eq.${ratee_stack_user_id}),and(applicant_stack_user_id.eq.${ratee_stack_user_id},jobs.created_by.eq.${rater_stack_user_id})`,
+      )
+      .in("status", ["hired", "completed"])
+      .limit(1);
+    if (relErr) return res.status(500).json({ error: relErr.message });
+    if (!rel || rel.length === 0)
       return res
         .status(403)
         .json({ error: "rating not allowed without collaboration" });
-    }
-    const rows = await query(
-      `INSERT INTO ratings (rater_stack_user_id, ratee_stack_user_id, score, comment)
-       VALUES ($1,$2,$3,$4)
-       ON CONFLICT (rater_stack_user_id, ratee_stack_user_id)
-       DO UPDATE SET score=EXCLUDED.score, comment=EXCLUDED.comment, created_at=now()
-       RETURNING id, rater_stack_user_id, ratee_stack_user_id, score, comment, created_at`,
-      [rater_stack_user_id, ratee_stack_user_id, score, comment ?? null],
-    );
-    res.status(201).json(rows[0]);
+    const { data, error } = await supabase
+      .from("ratings")
+      .upsert(
+        {
+          rater_stack_user_id,
+          ratee_stack_user_id,
+          score,
+          comment: comment ?? null,
+          created_at: new Date().toISOString(),
+        },
+        { onConflict: "rater_stack_user_id,ratee_stack_user_id" },
+      )
+      .select("id, rater_stack_user_id, ratee_stack_user_id, score, comment, created_at")
+      .limit(1)
+      .maybeSingle();
+    if (error) return res.status(500).json({ error: error.message });
+    res.status(201).json(data);
   });
 
   // Example API routes
@@ -351,11 +365,13 @@ export function createServer() {
   app.get("/api/jobs/mine/count", async (req, res) => {
     const owner = String(req.query.owner || "");
     if (!owner) return res.json({ count: 0 });
-    const rows = await query<{ count: string }>(
-      `SELECT COUNT(*)::text as count FROM jobs WHERE created_by=$1`,
-      [owner],
-    );
-    res.json({ count: Number(rows[0]?.count || 0) });
+    const supabase = getSupabase();
+    const { count, error } = await supabase
+      .from("jobs")
+      .select("id", { count: "exact", head: true })
+      .eq("created_by", owner);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ count: count || 0 });
   });
 
   // Messages
@@ -369,28 +385,38 @@ export function createServer() {
     const { status } = req.body ?? {};
     const owner = req.header("x-user-id") || "";
     if (!status) return res.status(400).json({ error: "status required" });
-    const rows = await query<{ created_by: string }>(
-      `SELECT j.created_by FROM applications a JOIN jobs j ON j.id=a.job_id WHERE a.id=$1 LIMIT 1`,
-      [id],
-    );
-    if (!rows[0]) return res.status(404).json({ error: "not found" });
-    if (!owner || rows[0].created_by !== owner)
+    const supabase = getSupabase();
+    const { data: apps, error: ownerErr } = await supabase
+      .from("applications")
+      .select("id, job_id, jobs:job_id(created_by)")
+      .eq("id", Number(id))
+      .limit(1)
+      .maybeSingle();
+    if (ownerErr) return res.status(500).json({ error: ownerErr.message });
+    if (!apps) return res.status(404).json({ error: "not found" });
+    if (!owner || apps.jobs?.created_by !== owner)
       return res.status(403).json({ error: "forbidden" });
-    const updated = await query(
-      `UPDATE applications SET status=$1, completed_at = CASE WHEN $1='completed' THEN now() ELSE completed_at END WHERE id=$2
-       RETURNING id, job_id, applicant_stack_user_id, message, status, created_at, completed_at`,
-      [status, id],
-    );
-    res.json(updated[0] ?? null);
+    const completed_at = status === "completed" ? new Date().toISOString() : null;
+    const { data, error } = await supabase
+      .from("applications")
+      .update({ status, completed_at })
+      .eq("id", Number(id))
+      .select("id, job_id, applicant_stack_user_id, message, status, created_at, completed_at")
+      .limit(1)
+      .maybeSingle();
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data ?? null);
   });
   app.get("/api/applications/mine/count", async (req, res) => {
     const applicant = String(req.query.applicant || "");
     if (!applicant) return res.json({ count: 0 });
-    const rows = await query<{ count: string }>(
-      `SELECT COUNT(*)::text as count FROM applications WHERE applicant_stack_user_id=$1`,
-      [applicant],
-    );
-    res.json({ count: Number(rows[0]?.count || 0) });
+    const supabase = getSupabase();
+    const { count, error } = await supabase
+      .from("applications")
+      .select("id", { count: "exact", head: true })
+      .eq("applicant_stack_user_id", applicant);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ count: count || 0 });
   });
 
   // Favorites
@@ -405,72 +431,93 @@ export function createServer() {
     const { stack_user_id } = req.body ?? {};
     if (!stack_user_id)
       return res.status(400).json({ error: "stack_user_id required" });
-    await query(
-      `INSERT INTO presence (stack_user_id, updated_at) VALUES ($1, now())
-       ON CONFLICT (stack_user_id) DO UPDATE SET updated_at=now()`,
-      [stack_user_id],
-    );
+    const supabase = getSupabase();
+    // Upsert by unique stack_user_id
+    const { error } = await supabase
+      .from("presence")
+      .upsert({ stack_user_id, updated_at: new Date().toISOString() }, { onConflict: "stack_user_id" });
+    if (error) return res.status(500).json({ error: error.message });
     res.json({ ok: true });
   });
   app.get("/api/presence/online", async (_req, res) => {
-    const rows = await query<{ count: string }>(
-      `SELECT COUNT(*)::text as count FROM presence WHERE updated_at > now() - interval '5 minutes'`,
-    );
-    res.json({ online: Number(rows[0]?.count || 0) });
+    const supabase = getSupabase();
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { count, error } = await supabase
+      .from("presence")
+      .select("id", { count: "exact", head: true })
+      .gt("updated_at", fiveMinutesAgo);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ online: count || 0 });
   });
 
   // Incoming applications count for owner
   app.get("/api/applications/incoming/count", async (req, res) => {
     const owner = String(req.query.owner || "");
     if (!owner) return res.json({ count: 0 });
-    const rows = await query<{ count: string }>(
-      `SELECT COUNT(*)::text as count FROM applications a JOIN jobs j ON j.id=a.job_id WHERE j.created_by=$1 AND a.status='pending'`,
-      [owner],
-    );
-    res.json({ count: Number(rows[0]?.count || 0) });
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("applications")
+      .select("id, status, jobs:job_id(created_by)")
+      .eq("status", "pending")
+      .eq("jobs.created_by", owner);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ count: (data || []).length });
   });
 
   // Project history (completed collaborations)
   app.get("/api/history/:stackUserId", async (req, res) => {
     const { stackUserId } = req.params as { stackUserId: string };
-    const rows = await query(
-      `SELECT a.id, a.job_id, a.status, a.completed_at, j.title, j.created_by, a.applicant_stack_user_id
-       FROM applications a JOIN jobs j ON j.id=a.job_id
-       WHERE (a.applicant_stack_user_id=$1 OR j.created_by=$1) AND a.status='completed'
-       ORDER BY a.completed_at DESC NULLS LAST LIMIT 50`,
-      [stackUserId],
-    );
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("applications")
+      .select("id, job_id, status, completed_at, applicant_stack_user_id, jobs:job_id(title, created_by)")
+      .eq("status", "completed")
+      .or(`applicant_stack_user_id.eq.${stackUserId},jobs.created_by.eq.${stackUserId}`)
+      .order("completed_at", { ascending: false, nullsFirst: false })
+      .limit(50);
+    if (error) return res.status(500).json({ error: error.message });
+    const rows = (data || []).map((r: any) => ({
+      id: r.id,
+      job_id: r.job_id,
+      status: r.status,
+      completed_at: r.completed_at,
+      title: r.jobs?.title,
+      created_by: r.jobs?.created_by,
+      applicant_stack_user_id: r.applicant_stack_user_id,
+    }));
     res.json(rows);
   });
 
   // Site stats
   app.get("/api/stats", async (_req, res) => {
+    const supabase = getSupabase();
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     const [profiles, verifiedProfiles, jobs, applications, messages, online] =
       await Promise.all([
-        query<{ count: string }>(
-          `SELECT COUNT(*)::text as count FROM profiles`,
-        ),
-        query<{ count: string }>(
-          `SELECT COUNT(*)::text as count FROM profiles WHERE is_verified IS TRUE`,
-        ),
-        query<{ count: string }>(`SELECT COUNT(*)::text as count FROM jobs`),
-        query<{ count: string }>(
-          `SELECT COUNT(*)::text as count FROM applications`,
-        ),
-        query<{ count: string }>(
-          `SELECT COUNT(*)::text as count FROM messages`,
-        ),
-        query<{ count: string }>(
-          `SELECT COUNT(*)::text as count FROM presence WHERE updated_at > now() - interval '5 minutes'`,
-        ),
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
+        supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .is("is_verified", true),
+        supabase.from("jobs").select("id", { count: "exact", head: true }),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true }),
+        supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true }),
+        supabase
+          .from("presence")
+          .select("id", { count: "exact", head: true })
+          .gt("updated_at", fiveMinutesAgo),
       ]);
     res.json({
-      profiles: Number(profiles[0]?.count || 0),
-      verifiedProfiles: Number(verifiedProfiles[0]?.count || 0),
-      jobs: Number(jobs[0]?.count || 0),
-      applications: Number(applications[0]?.count || 0),
-      messages: Number(messages[0]?.count || 0),
-      online: Number(online[0]?.count || 0),
+      profiles: profiles.count || 0,
+      verifiedProfiles: verifiedProfiles.count || 0,
+      jobs: jobs.count || 0,
+      applications: applications.count || 0,
+      messages: messages.count || 0,
+      online: online.count || 0,
     });
   });
 
