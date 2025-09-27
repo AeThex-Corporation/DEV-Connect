@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useEffect, useMemo, useState } from "react";
+import { useUser } from "@/lib/fake-stack";
 import {
   BadgeCheck,
   Star,
@@ -11,19 +13,44 @@ import {
 } from "lucide-react";
 
 export default function Index() {
+  const user = useUser();
+  const [profile, setProfile] = useState<any | null>(null);
+  useEffect(() => {
+    (async () => {
+      if (!user) {
+        setProfile(null);
+        return;
+      }
+      const r = await fetch(`/api/profile/me?stackUserId=${encodeURIComponent(user.id)}`);
+      setProfile(await r.json());
+    })();
+  }, [user]);
+  const incomplete = useMemo(() => {
+    if (!user) return false;
+    if (!profile) return true;
+    const hasRole = !!profile.role;
+    const hasTags = Array.isArray(profile.tags) && profile.tags.length > 0;
+    return !(hasRole && hasTags);
+  }, [user, profile]);
   return (
     <div className="space-y-20">
-      <HeroSection />
+      <HeroSection user={user} incomplete={incomplete} />
       <KeyPillars />
       <FeaturedProfiles />
       <FeaturedJobs />
       <TrustSafety />
-      <CTASection />
+      <CTASection user={user} incomplete={incomplete} />
     </div>
   );
 }
 
-function HeroSection() {
+function HeroSection({
+  user,
+  incomplete,
+}: {
+  user: ReturnType<typeof useUser>;
+  incomplete: boolean;
+}) {
   return (
     <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/5 via-violet-500/10 to-indigo-500/5 p-8 sm:p-12">
       <div className="absolute inset-0 -z-10 [background:radial-gradient(1200px_circle_at_10%_10%,hsl(var(--primary)/0.15),transparent_40%),radial-gradient(900px_circle_at_90%_20%,rgba(124,58,237,.15),transparent_35%)]" />
@@ -47,9 +74,21 @@ function HeroSection() {
           >
             <Link to="/jobs">Browse jobs</Link>
           </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link to="/onboarding">Create your profile</Link>
-          </Button>
+          {!user && (
+            <Button asChild size="lg" variant="outline">
+              <Link to="/onboarding">Create your profile</Link>
+            </Button>
+          )}
+          {user && incomplete && (
+            <Button asChild size="lg" variant="outline">
+              <Link to="/settings">Set up your profile</Link>
+            </Button>
+          )}
+          {user && !incomplete && (
+            <Button asChild size="lg" variant="outline">
+              <Link to={`/u/${encodeURIComponent(user.id!)}`}>View your profile</Link>
+            </Button>
+          )}
         </div>
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -139,26 +178,10 @@ function KeyPillars() {
 }
 
 function FeaturedProfiles() {
-  const profiles = [
-    {
-      name: "NovaScripts",
-      role: "Scripter (Lua)",
-      tags: ["Lua", "ProfileService", "AeroGameFramework"],
-      status: "Open to Work",
-    },
-    {
-      name: "VoxelVista",
-      role: "Builder / Terrain",
-      tags: ["Blender", "Terrain Editor", "Optimization"],
-      status: "Only Networking",
-    },
-    {
-      name: "PixelPulse",
-      role: "UI/UX Designer",
-      tags: ["Figma", "Roblox UI", "Prototyping"],
-      status: "Open to Work",
-    },
-  ];
+  const [items, setItems] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("/api/featured/devs").then((r) => r.json()).then(setItems);
+  }, []);
   return (
     <section>
       <div className="flex items-end justify-between gap-4">
@@ -173,30 +196,25 @@ function FeaturedProfiles() {
         </Button>
       </div>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {profiles.map((p) => (
-          <article key={p.name} className="rounded-xl border bg-card p-5">
+        {items.map((p) => (
+          <article key={p.stack_user_id} className="rounded-xl border bg-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold">{p.name}</h3>
-                <p className="text-sm text-muted-foreground">{p.role}</p>
+                <h3 className="font-semibold">{p.display_name}</h3>
+                <p className="text-sm text-muted-foreground">{p.role || "Developer"}</p>
               </div>
               <span className="text-xs rounded-full px-2 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20">
-                {p.status}
+                {p.availability || "—"}
               </span>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {p.tags.map((t) => (
+              {(p.tags || []).slice(0, 6).map((t: string) => (
                 <span
                   key={t}
                   className="text-xs rounded-md px-2 py-1 bg-muted text-muted-foreground"
                 >
                   {t}
                 </span>
-              ))}
-            </div>
-            <div className="mt-4 flex items-center gap-1 text-amber-500">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-4 w-4 fill-current" />
               ))}
             </div>
           </article>
@@ -207,26 +225,10 @@ function FeaturedProfiles() {
 }
 
 function FeaturedJobs() {
-  const jobs = [
-    {
-      title: "Lead Scripter for Simulator",
-      comp: "USD/Hourly",
-      genre: "Simulator",
-      scope: "Long-term",
-    },
-    {
-      title: "Terrain Artist",
-      comp: "Fixed Robux",
-      genre: "Adventure",
-      scope: "Small task",
-    },
-    {
-      title: "UI/UX Designer",
-      comp: "Rev Share",
-      genre: "FPS",
-      scope: "Full Game",
-    },
-  ];
+  const [items, setItems] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("/api/featured/jobs").then((r) => r.json()).then(setItems);
+  }, []);
   return (
     <section>
       <div className="flex items-end justify-between gap-4">
@@ -241,8 +243,8 @@ function FeaturedJobs() {
         </Button>
       </div>
       <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {jobs.map((j) => (
-          <article key={j.title} className="rounded-xl border bg-card p-5">
+        {items.map((j) => (
+          <article key={j.id} className="rounded-xl border bg-card p-5">
             <h3 className="font-semibold">{j.title}</h3>
             <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
               <div>
@@ -251,15 +253,15 @@ function FeaturedJobs() {
               </div>
               <div>
                 <dt className="text-muted-foreground">Genre</dt>
-                <dd>{j.genre}</dd>
+                <dd>{j.genre || "—"}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Scope</dt>
-                <dd>{j.scope}</dd>
+                <dd>{j.scope || "—"}</dd>
               </div>
             </dl>
             <Button asChild variant="outline" className="mt-4">
-              <Link to="/jobs">Apply</Link>
+              <Link to={`/jobs`}>Apply</Link>
             </Button>
           </article>
         ))}
@@ -303,22 +305,40 @@ function TrustSafety() {
   );
 }
 
-function CTASection() {
+function CTASection({
+  user,
+  incomplete,
+}: {
+  user: ReturnType<typeof useUser>;
+  incomplete: boolean;
+}) {
   return (
     <section className="text-center">
       <h2 className="text-3xl font-bold">
         Ready to find your next collaborator?
       </h2>
       <p className="mt-2 text-muted-foreground">
-        Create a profile or browse jobs with clear compensation and scope.
+        {user ? "Set up your profile or browse jobs with clear compensation and scope." : "Create a profile or browse jobs with clear compensation and scope."}
       </p>
       <div className="mt-5 flex items-center justify-center gap-3">
         <Button asChild size="lg">
           <Link to="/jobs">Browse jobs</Link>
         </Button>
-        <Button asChild size="lg" variant="outline">
-          <Link to="/onboarding">Create profile</Link>
-        </Button>
+        {!user && (
+          <Button asChild size="lg" variant="outline">
+            <Link to="/onboarding">Create profile</Link>
+          </Button>
+        )}
+        {user && incomplete && (
+          <Button asChild size="lg" variant="outline">
+            <Link to="/settings">Set up profile</Link>
+          </Button>
+        )}
+        {user && !incomplete && (
+          <Button asChild size="lg" variant="outline">
+            <Link to={`/u/${encodeURIComponent(user.id!)}`}>View your profile</Link>
+          </Button>
+        )}
       </div>
     </section>
   );
