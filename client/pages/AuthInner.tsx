@@ -15,22 +15,35 @@ export default function AuthInner() {
     setError(null);
     setLoading(true);
     try {
-      const sb = (await import("@/lib/supabase")).getSupabase();
-      if (!sb) throw new Error("Auth not configured");
-      if (mode === "signup") {
-        const { error } = await sb.auth.signUp({ email, password, options: { data: { name } } });
-        if (error) throw error;
+      const { getSupabase } = await import("@/lib/supabase");
+      const sb = getSupabase();
+      if (sb) {
+        if (mode === "signup") {
+          const { error } = await sb.auth.signUp({ email, password, options: { data: { name } } });
+          if (error) throw error;
+        } else {
+          const { error } = await sb.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+        }
+        await fetch("/api/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ stack_user_id: `local:${email}`, email, display_name: name || email.split("@")[0] }),
+        });
+        signin(`local:${email}`, name || email.split("@")[0]);
       } else {
-        const { error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        const url = mode === "signup" ? "/api/auth/signup" : "/api/auth/login";
+        const body: any = { email, password };
+        if (mode === "signup") body.display_name = name;
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) throw new Error((await r.json()).error || "Auth failed");
+        const data = await r.json();
+        signin(data.id, data.displayName);
       }
-      // Tie and merge on backend using email as stable ID
-      await fetch("/api/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stack_user_id: `local:${email}`, email, display_name: name || email.split("@")[0] }),
-      });
-      signin(`local:${email}`, name || email.split("@")[0]);
       window.location.replace("/onboarding");
     } catch (err: any) {
       setError(err.message || "Auth failed");
