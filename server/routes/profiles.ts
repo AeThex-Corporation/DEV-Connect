@@ -25,7 +25,10 @@ export const getPublicProfile: RequestHandler = async (req, res) => {
 };
 
 export const listProfiles: RequestHandler = async (req, res) => {
-  const { q, role, availability, tags } = req.query as Record<string, string | undefined>;
+  const { q, role, availability, tags } = req.query as Record<
+    string,
+    string | undefined
+  >;
   const clauses: string[] = [];
   const params: any[] = [];
   if (q) {
@@ -47,7 +50,10 @@ export const listProfiles: RequestHandler = async (req, res) => {
     clauses.push("availability = $" + params.length);
   }
   if (tags) {
-    const arr = tags.split(",").map((t) => t.trim()).filter(Boolean);
+    const arr = tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
     if (arr.length) {
       params.push(arr);
       clauses.push("tags && $" + params.length);

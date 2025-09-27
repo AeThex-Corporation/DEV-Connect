@@ -74,7 +74,11 @@ export default function ProfileView() {
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full -mt-16 ring-2 ring-background overflow-hidden bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
                 {p.avatar_url ? (
-                  <img src={p.avatar_url} alt={p.display_name} className="h-full w-full object-cover" />
+                  <img
+                    src={p.avatar_url}
+                    alt={p.display_name}
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   initial
                 )}

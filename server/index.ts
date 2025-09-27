@@ -8,12 +8,24 @@ import {
   listProfiles,
   upsertProfile,
 } from "./routes/profiles";
-import { listJobs, createJob, getJob, applyToJob, listIncomingApplications } from "./routes/jobs";
+import {
+  listJobs,
+  createJob,
+  getJob,
+  applyToJob,
+  listIncomingApplications,
+} from "./routes/jobs";
 import { listThread, sendMessage } from "./routes/messages";
 import { listFavorites, toggleFavorite } from "./routes/favorites";
 import { submitReport } from "./routes/reports";
 import authRouter from "./auth";
-import { signup, login, changePassword, forgotPassword, resetPassword } from "./routes/auth-local";
+import {
+  signup,
+  login,
+  changePassword,
+  forgotPassword,
+  resetPassword,
+} from "./routes/auth-local";
 import { query } from "./db";
 import adminRouter from "./routes/admin";
 import { listFeaturedDevs, listFeaturedJobs } from "./routes/featured";
@@ -141,7 +153,9 @@ async function ensureSchema() {
   );
 
   // Applications viewed flag
-  await query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS viewed_by_owner BOOLEAN DEFAULT false`);
+  await query(
+    `ALTER TABLE applications ADD COLUMN IF NOT EXISTS viewed_by_owner BOOLEAN DEFAULT false`,
+  );
 }
 
 export function createServer() {
@@ -207,7 +221,8 @@ export function createServer() {
   // Presence
   app.post("/api/presence/ping", async (req, res) => {
     const { stack_user_id } = req.body ?? {};
-    if (!stack_user_id) return res.status(400).json({ error: "stack_user_id required" });
+    if (!stack_user_id)
+      return res.status(400).json({ error: "stack_user_id required" });
     await query(
       `INSERT INTO presence (stack_user_id, updated_at) VALUES ($1, now())
        ON CONFLICT (stack_user_id) DO UPDATE SET updated_at=now()`,

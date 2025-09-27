@@ -78,7 +78,12 @@ export default function AuthInner() {
               required
             />
             {mode === "signin" && (
-              <a href="/auth/forgot" className="text-xs underline text-muted-foreground">Forgot password?</a>
+              <a
+                href="/auth/forgot"
+                className="text-xs underline text-muted-foreground"
+              >
+                Forgot password?
+              </a>
             )}
             {error && <div className="text-sm text-red-600">{error}</div>}
             <button

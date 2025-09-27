@@ -43,9 +43,13 @@ export const changePassword: RequestHandler = async (req, res) => {
   if (!stack_user_id || !current_password || !new_password)
     return res
       .status(400)
-      .json({ error: "stack_user_id, current_password, new_password required" });
+      .json({
+        error: "stack_user_id, current_password, new_password required",
+      });
   if (!stack_user_id.startsWith("local:"))
-    return res.status(400).json({ error: "only local users can change password" });
+    return res
+      .status(400)
+      .json({ error: "only local users can change password" });
   const email = stack_user_id.slice("local:".length);
   const rows = await query<{ password_hash: string }>(
     `SELECT password_hash FROM users_local WHERE email=$1`,
@@ -56,10 +60,10 @@ export const changePassword: RequestHandler = async (req, res) => {
   const ok = await bcrypt.compare(current_password, row.password_hash);
   if (!ok) return res.status(401).json({ error: "invalid current password" });
   const hash = await bcrypt.hash(new_password, 10);
-  await query(`UPDATE users_local SET password_hash=$1, updated_at=now() WHERE email=$2`, [
-    hash,
-    email,
-  ]);
+  await query(
+    `UPDATE users_local SET password_hash=$1, updated_at=now() WHERE email=$2`,
+    [hash, email],
+  );
   res.json({ ok: true });
 };
 
@@ -93,10 +97,10 @@ export const resetPassword: RequestHandler = async (req, res) => {
   if (new Date(row.expires_at).getTime() < Date.now())
     return res.status(400).json({ error: "token expired" });
   const hash = await bcrypt.hash(new_password, 10);
-  await query(`UPDATE users_local SET password_hash=$1, updated_at=now() WHERE email=$2`, [
-    hash,
-    row.email,
-  ]);
+  await query(
+    `UPDATE users_local SET password_hash=$1, updated_at=now() WHERE email=$2`,
+    [hash, row.email],
+  );
   await query(`DELETE FROM password_resets WHERE token=$1`, [token]);
   res.json({ ok: true });
 };

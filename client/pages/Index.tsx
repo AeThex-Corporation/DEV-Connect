@@ -21,7 +21,9 @@ export default function Index() {
         setProfile(null);
         return;
       }
-      const r = await fetch(`/api/profile/me?stackUserId=${encodeURIComponent(user.id)}`);
+      const r = await fetch(
+        `/api/profile/me?stackUserId=${encodeURIComponent(user.id)}`,
+      );
       setProfile(await r.json());
     })();
   }, [user]);
@@ -86,7 +88,9 @@ function HeroSection({
           )}
           {user && !incomplete && (
             <Button asChild size="lg" variant="outline">
-              <Link to={`/u/${encodeURIComponent(user.id!)}`}>View your profile</Link>
+              <Link to={`/u/${encodeURIComponent(user.id!)}`}>
+                View your profile
+              </Link>
             </Button>
           )}
         </div>
@@ -180,7 +184,9 @@ function KeyPillars() {
 function FeaturedProfiles() {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
-    fetch("/api/featured/devs").then((r) => r.json()).then(setItems);
+    fetch("/api/featured/devs")
+      .then((r) => r.json())
+      .then(setItems);
   }, []);
   return (
     <section>
@@ -197,11 +203,16 @@ function FeaturedProfiles() {
       </div>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((p) => (
-          <article key={p.stack_user_id} className="rounded-xl border bg-card p-5">
+          <article
+            key={p.stack_user_id}
+            className="rounded-xl border bg-card p-5"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold">{p.display_name}</h3>
-                <p className="text-sm text-muted-foreground">{p.role || "Developer"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {p.role || "Developer"}
+                </p>
               </div>
               <span className="text-xs rounded-full px-2 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20">
                 {p.availability || "—"}
@@ -227,7 +238,9 @@ function FeaturedProfiles() {
 function FeaturedJobs() {
   const [items, setItems] = useState<any[]>([]);
   useEffect(() => {
-    fetch("/api/featured/jobs").then((r) => r.json()).then(setItems);
+    fetch("/api/featured/jobs")
+      .then((r) => r.json())
+      .then(setItems);
   }, []);
   return (
     <section>
@@ -318,7 +331,9 @@ function CTASection({
         Ready to find your next collaborator?
       </h2>
       <p className="mt-2 text-muted-foreground">
-        {user ? "Set up your profile or browse jobs with clear compensation and scope." : "Create a profile or browse jobs with clear compensation and scope."}
+        {user
+          ? "Set up your profile or browse jobs with clear compensation and scope."
+          : "Create a profile or browse jobs with clear compensation and scope."}
       </p>
       <div className="mt-5 flex items-center justify-center gap-3">
         <Button asChild size="lg">
@@ -336,7 +351,9 @@ function CTASection({
         )}
         {user && !incomplete && (
           <Button asChild size="lg" variant="outline">
-            <Link to={`/u/${encodeURIComponent(user.id!)}`}>View your profile</Link>
+            <Link to={`/u/${encodeURIComponent(user.id!)}`}>
+              View your profile
+            </Link>
           </Button>
         )}
       </div>

@@ -27,7 +27,9 @@ export default function ProfilesPage() {
         setIncomplete(false);
         return;
       }
-      const r = await fetch(`/api/profile/me?stackUserId=${encodeURIComponent(user.id)}`);
+      const r = await fetch(
+        `/api/profile/me?stackUserId=${encodeURIComponent(user.id)}`,
+      );
       const data = await r.json();
       const hasRole = !!data?.role;
       const hasTags = Array.isArray(data?.tags) && data.tags.length > 0;
@@ -57,7 +59,9 @@ export default function ProfilesPage() {
         <div className="rounded-xl border bg-card p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <div className="font-semibold">New here?</div>
-            <div className="text-sm text-muted-foreground">Create a profile to get discovered and message developers.</div>
+            <div className="text-sm text-muted-foreground">
+              Create a profile to get discovered and message developers.
+            </div>
           </div>
           <div className="flex gap-2">
             <Button asChild>
@@ -73,7 +77,9 @@ export default function ProfilesPage() {
         <div className="rounded-xl border bg-card p-4 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <div className="font-semibold">Finish setting up your profile</div>
-            <div className="text-sm text-muted-foreground">Add your role and a few tags to help others find you.</div>
+            <div className="text-sm text-muted-foreground">
+              Add your role and a few tags to help others find you.
+            </div>
           </div>
           <div className="flex gap-2">
             <Button asChild>
@@ -135,14 +141,20 @@ export default function ProfilesPage() {
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold overflow-hidden">
                 {p.avatar_url ? (
-                  <img src={p.avatar_url} alt={p.display_name} className="h-full w-full object-cover" />
+                  <img
+                    src={p.avatar_url}
+                    alt={p.display_name}
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   (p.display_name || "U").charAt(0).toUpperCase()
                 )}
               </div>
               <div>
                 <h3 className="font-semibold">{p.display_name}</h3>
-                <p className="text-sm text-muted-foreground">{p.role || "Developer"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {p.role || "Developer"}
+                </p>
               </div>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">

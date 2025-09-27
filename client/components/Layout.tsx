@@ -29,7 +29,9 @@ function SiteHeader() {
         setIncomingCount(0);
         return;
       }
-      const r = await fetch(`/api/applications/incoming/count?owner=${encodeURIComponent(user.id)}`);
+      const r = await fetch(
+        `/api/applications/incoming/count?owner=${encodeURIComponent(user.id)}`,
+      );
       const d = await r.json();
       setIncomingCount(d.count || 0);
     }
@@ -126,7 +128,11 @@ function SiteFooter() {
     let t: any;
     async function ping() {
       if (user?.id) {
-        await fetch(`/api/presence/ping`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ stack_user_id: user.id }) });
+        await fetch(`/api/presence/ping`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ stack_user_id: user.id }),
+        });
       }
       const r = await fetch(`/api/presence/online`);
       const d = await r.json();
@@ -191,7 +197,8 @@ function SiteFooter() {
         </div>
       </div>
       <div className="border-t py-4 text-center text-xs text-muted-foreground">
-        {online} online • Developed & Powered By AeThex.Dev • © {new Date().getFullYear()} RBX Connect. All rights reserved.
+        {online} online • Developed & Powered By AeThex.Dev • ©{" "}
+        {new Date().getFullYear()} RBX Connect. All rights reserved.
       </div>
     </footer>
   );

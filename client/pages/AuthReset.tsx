@@ -43,7 +43,12 @@ export default function AuthReset() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button className="rounded-md bg-primary text-primary-foreground px-4 py-2" type="submit">Reset password</button>
+        <button
+          className="rounded-md bg-primary text-primary-foreground px-4 py-2"
+          type="submit"
+        >
+          Reset password
+        </button>
       </form>
       {error && <div className="text-sm text-red-600">{error}</div>}
     </div>
