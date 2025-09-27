@@ -7,19 +7,21 @@ export const listFavorites: RequestHandler = async (req, res) => {
   if (!stack_user_id)
     return res.status(400).json({ error: "stack_user_id required" });
   const supabase = getSupabase();
-  const { data, error } = await supabase
+  const { data: favs, error: fErr } = await supabase
     .from("favorites")
-    .select("created_at, favorite_stack_user_id, profiles:favorite_stack_user_id(stack_user_id, display_name, role, tags, availability)")
+    .select("favorite_stack_user_id, created_at")
     .eq("stack_user_id", stack_user_id)
     .order("created_at", { ascending: false });
-  if (error) return res.status(500).json({ error: error.message });
-  const rows = (data || []).map((r: any) => ({
-    stack_user_id: r.profiles?.stack_user_id,
-    display_name: r.profiles?.display_name,
-    role: r.profiles?.role,
-    tags: r.profiles?.tags,
-    availability: r.profiles?.availability,
-  }));
+  if (fErr) return res.status(500).json({ error: fErr.message });
+  const ids = (favs || []).map((f) => f.favorite_stack_user_id);
+  if (ids.length === 0) return res.json([]);
+  const { data: profiles, error: pErr } = await supabase
+    .from("profiles")
+    .select("stack_user_id, display_name, role, tags, availability")
+    .in("stack_user_id", ids);
+  if (pErr) return res.status(500).json({ error: pErr.message });
+  const map = new Map((profiles || []).map((p: any) => [p.stack_user_id, p]));
+  const rows = ids.map((id) => map.get(id)).filter(Boolean);
   res.json(rows);
 };
 
