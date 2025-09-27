@@ -35,14 +35,7 @@ function SiteHeader() {
             active={location.pathname.startsWith("/jobs")}>Jobs</NavItem>
         </nav>
         <div className="flex items-center gap-2">
-          {user ? (
-            <>
-              <Link to="/profile" className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground">Profile</Link>
-              <UserButton />
-            </>
-          ) : (
-            <Button asChild variant="ghost" className="hidden sm:inline-flex"><Link to="/auth">Sign in</Link></Button>
-          )}
+          <UserStatus />
           <Button asChild className="bg-gradient-to-r from-primary to-violet-500 hover:from-primary/90 hover:to-violet-500/90"><Link to="/jobs">Post a job</Link></Button>
         </div>
       </div>
