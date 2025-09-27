@@ -13,6 +13,8 @@ interface PublicProfile {
   availability?: string;
   trust_score?: number;
   portfolio?: any[];
+  avatar_url?: string;
+  banner_url?: string;
 }
 
 export default function ProfileView() {
@@ -58,41 +60,55 @@ export default function ProfileView() {
   const initial = (p.display_name || "U").charAt(0).toUpperCase();
   return (
     <div className="mx-auto max-w-4xl">
-      <section className="rounded-2xl border bg-card p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
-              {initial}
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
-                {p.display_name}
-              </h1>
-              <p className="text-muted-foreground">{p.role || "Developer"}</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {tags.slice(0, 6).map((t) => (
-                  <span
-                    key={t}
-                    className="text-xs rounded-md px-2 py-1 bg-muted text-muted-foreground"
-                  >
-                    {t}
-                  </span>
-                ))}
+      <section className="rounded-2xl border bg-card overflow-hidden">
+        <div
+          className="h-32 sm:h-40 w-full bg-muted"
+          style={{
+            backgroundImage: p.banner_url ? `url(${p.banner_url})` : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        <div className="p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full -mt-16 ring-2 ring-background overflow-hidden bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
+                {p.avatar_url ? (
+                  <img src={p.avatar_url} alt={p.display_name} className="h-full w-full object-cover" />
+                ) : (
+                  initial
+                )}
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
+                  {p.display_name}
+                </h1>
+                <p className="text-muted-foreground">{p.role || "Developer"}</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {tags.slice(0, 6).map((t) => (
+                    <span
+                      key={t}
+                      className="text-xs rounded-md px-2 py-1 bg-muted text-muted-foreground"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={connect}>Connect</Button>
-            <Button variant="outline" onClick={favorite}>
-              Favorite
-            </Button>
-            <Button asChild variant="outline">
-              <Link
-                to={`/messages?peer=${encodeURIComponent(p.stack_user_id)}`}
-              >
-                Message
-              </Link>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={connect}>Connect</Button>
+              <Button variant="outline" onClick={favorite}>
+                Favorite
+              </Button>
+              <Button asChild variant="outline">
+                <Link
+                  to={`/messages?peer=${encodeURIComponent(p.stack_user_id)}`}
+                >
+                  Message
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
