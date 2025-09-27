@@ -60,6 +60,9 @@ async function ensureSchema() {
   await query(
     `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS email TEXT UNIQUE`,
   );
+  await query(
+    `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE`,
+  );
 
   // Local users (email unique)
   await query(
@@ -309,7 +312,7 @@ export function createServer() {
           `SELECT COUNT(*)::text as count FROM profiles`,
         ),
         query<{ count: string }>(
-          `SELECT COUNT(*)::text as count FROM profiles WHERE passport_id IS NOT NULL`,
+          `SELECT COUNT(*)::text as count FROM profiles WHERE is_verified IS TRUE`,
         ),
         query<{ count: string }>(`SELECT COUNT(*)::text as count FROM jobs`),
         query<{ count: string }>(
