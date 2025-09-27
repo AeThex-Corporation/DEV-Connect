@@ -251,6 +251,43 @@ export function createServer() {
   // Ensure DB schema on cold start
   ensureSchema().catch(() => {});
 
+  // Optional auto-migration from Neon to Supabase
+  (async () => {
+    try {
+      if (process.env.SUPABASE_URL && process.env.DATABASE_URL && process.env.AUTO_MIGRATE === "1") {
+        const supabase = getSupabase();
+        async function copy(table: string, selectSql: string, onConflict?: string) {
+          const rows = await query<any>(selectSql);
+          if (!rows.length) return;
+          const chunkSize = 500;
+          for (let i = 0; i < rows.length; i += chunkSize) {
+            const chunk = rows.slice(i, i + chunkSize);
+            const { error } = await supabase
+              .from(table)
+              .upsert(chunk, onConflict ? { onConflict } : undefined);
+            if (error) throw new Error(`${table}: ${error.message}`);
+          }
+        }
+        await copy("profiles", "SELECT * FROM profiles", "stack_user_id");
+        await copy("users_local", "SELECT * FROM users_local", "email");
+        await copy("jobs", "SELECT * FROM jobs", "id");
+        await copy("applications", "SELECT * FROM applications", "id");
+        await copy("messages", "SELECT * FROM messages", "id");
+        await copy("favorites", "SELECT * FROM favorites", "stack_user_id,favorite_stack_user_id");
+        await copy("reports", "SELECT * FROM reports", "id");
+        await copy("featured_devs", "SELECT * FROM featured_devs", "stack_user_id");
+        await copy("profile_badges", "SELECT * FROM profile_badges", "stack_user_id,slug");
+        await copy("ratings", "SELECT * FROM ratings", "rater_stack_user_id,ratee_stack_user_id");
+        await copy("featured_jobs", "SELECT * FROM featured_jobs", "job_id");
+        await copy("tickets", "SELECT * FROM tickets", "id");
+        await copy("password_resets", "SELECT * FROM password_resets", "token");
+        await copy("presence", "SELECT * FROM presence", "stack_user_id");
+      }
+    } catch (_e) {
+      // swallow; manual migration endpoint is available
+    }
+  })();
+
   // Middleware
   app.use(cors());
   app.use(express.json({ limit: "8mb" }));
