@@ -63,6 +63,14 @@ async function ensureSchema() {
   await query(
     `ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE`,
   );
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS payment_pref TEXT`);
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS devforum_url TEXT`);
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS discord_handle TEXT`);
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS roblox_user_id TEXT`);
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS github_url TEXT`);
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS artstation_url TEXT`);
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS youtube_url TEXT`);
+  await query(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS roblox_game_url TEXT`);
 
   // Local users (email unique)
   await query(
@@ -216,6 +224,9 @@ async function ensureSchema() {
   await query(
     `ALTER TABLE applications ADD COLUMN IF NOT EXISTS viewed_by_owner BOOLEAN DEFAULT false`,
   );
+  await query(
+    `ALTER TABLE applications ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ`,
+  );
 }
 
 export function createServer() {
@@ -270,6 +281,20 @@ export function createServer() {
       req.body ?? {};
     if (!rater_stack_user_id || !ratee_stack_user_id || !score)
       return res.status(400).json({ error: "rater, ratee and score required" });
+    const rel = await query<{ cnt: string }>(
+      `SELECT COUNT(*)::text as cnt
+       FROM applications a
+       JOIN jobs j ON j.id = a.job_id
+       WHERE (
+         (a.applicant_stack_user_id=$1 AND j.created_by=$2)
+         OR
+         (a.applicant_stack_user_id=$2 AND j.created_by=$1)
+       ) AND a.status IN ('hired','completed')`,
+      [rater_stack_user_id, ratee_stack_user_id],
+    );
+    if (Number(rel[0]?.cnt || 0) === 0) {
+      return res.status(403).json({ error: "rating not allowed without collaboration" });
+    }
     const rows = await query(
       `INSERT INTO ratings (rater_stack_user_id, ratee_stack_user_id, score, comment)
        VALUES ($1,$2,$3,$4)
@@ -325,6 +350,25 @@ export function createServer() {
 
   // Applications
   app.get("/api/applications/incoming", listIncomingApplications);
+  app.patch("/api/applications/:id/status", async (req, res) => {
+    const { id } = req.params as { id: string };
+    const { status } = req.body ?? {};
+    const owner = req.header("x-user-id") || "";
+    if (!status) return res.status(400).json({ error: "status required" });
+    const rows = await query<{ created_by: string }>(
+      `SELECT j.created_by FROM applications a JOIN jobs j ON j.id=a.job_id WHERE a.id=$1 LIMIT 1`,
+      [id],
+    );
+    if (!rows[0]) return res.status(404).json({ error: "not found" });
+    if (!owner || rows[0].created_by !== owner)
+      return res.status(403).json({ error: "forbidden" });
+    const updated = await query(
+      `UPDATE applications SET status=$1, completed_at = CASE WHEN $1='completed' THEN now() ELSE completed_at END WHERE id=$2
+       RETURNING id, job_id, applicant_stack_user_id, message, status, created_at, completed_at`,
+      [status, id],
+    );
+    res.json(updated[0] ?? null);
+  });
   app.get("/api/applications/mine/count", async (req, res) => {
     const applicant = String(req.query.applicant || "");
     if (!applicant) return res.json({ count: 0 });
@@ -370,6 +414,19 @@ export function createServer() {
       [owner],
     );
     res.json({ count: Number(rows[0]?.count || 0) });
+  });
+
+  // Project history (completed collaborations)
+  app.get("/api/history/:stackUserId", async (req, res) => {
+    const { stackUserId } = req.params as { stackUserId: string };
+    const rows = await query(
+      `SELECT a.id, a.job_id, a.status, a.completed_at, j.title, j.created_by, a.applicant_stack_user_id
+       FROM applications a JOIN jobs j ON j.id=a.job_id
+       WHERE (a.applicant_stack_user_id=$1 OR j.created_by=$1) AND a.status='completed'
+       ORDER BY a.completed_at DESC NULLS LAST LIMIT 50`,
+      [stackUserId],
+    );
+    res.json(rows);
   });
 
   // Site stats
