@@ -13,7 +13,7 @@ import { listThread, sendMessage } from "./routes/messages";
 import { listFavorites, toggleFavorite } from "./routes/favorites";
 import { submitReport } from "./routes/reports";
 import authRouter from "./auth";
-import { signup, login } from "./routes/auth-local";
+import { signup, login, changePassword, forgotPassword, resetPassword } from "./routes/auth-local";
 import { query } from "./db";
 import adminRouter from "./routes/admin";
 import { listFeaturedDevs, listFeaturedJobs } from "./routes/featured";
@@ -159,6 +159,9 @@ export function createServer() {
   app.use("/api", authRouter);
   app.post("/api/auth/signup", signup);
   app.post("/api/auth/login", login);
+  app.post("/api/auth/change-password", changePassword);
+  app.post("/api/auth/forgot", forgotPassword);
+  app.post("/api/auth/reset", resetPassword);
 
   // Admin routes
   app.use("/api/admin", adminRouter);
@@ -197,6 +200,35 @@ export function createServer() {
 
   // Reports
   app.post("/api/report", submitReport);
+
+  // Presence
+  app.post("/api/presence/ping", async (req, res) => {
+    const { stack_user_id } = req.body ?? {};
+    if (!stack_user_id) return res.status(400).json({ error: "stack_user_id required" });
+    await query(
+      `INSERT INTO presence (stack_user_id, updated_at) VALUES ($1, now())
+       ON CONFLICT (stack_user_id) DO UPDATE SET updated_at=now()`,
+      [stack_user_id],
+    );
+    res.json({ ok: true });
+  });
+  app.get("/api/presence/online", async (_req, res) => {
+    const rows = await query<{ count: string }>(
+      `SELECT COUNT(*)::text as count FROM presence WHERE updated_at > now() - interval '5 minutes'`,
+    );
+    res.json({ online: Number(rows[0]?.count || 0) });
+  });
+
+  // Incoming applications count for owner
+  app.get("/api/applications/incoming/count", async (req, res) => {
+    const owner = String(req.query.owner || "");
+    if (!owner) return res.json({ count: 0 });
+    const rows = await query<{ count: string }>(
+      `SELECT COUNT(*)::text as count FROM applications a JOIN jobs j ON j.id=a.job_id WHERE j.created_by=$1 AND a.status='pending'`,
+      [owner],
+    );
+    res.json({ count: Number(rows[0]?.count || 0) });
+  });
 
   return app;
 }
