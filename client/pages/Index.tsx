@@ -119,6 +119,9 @@ function HeroSection({
           >
             <Link to="/jobs">Browse jobs</Link>
           </Button>
+          <Button asChild size="lg" variant="outline">
+            <Link to="/profiles">Browse profiles</Link>
+          </Button>
           {!user && (
             <Button asChild size="lg" variant="outline">
               <Link to="/onboarding">Create your profile</Link>
@@ -249,7 +252,7 @@ function FeaturedProfiles() {
           </p>
         </div>
         <Button asChild variant="outline">
-          <Link to="/jobs">Hire talent</Link>
+          <Link to="/profiles">Browse profiles</Link>
         </Button>
       </div>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -397,6 +400,9 @@ function CTASection({
       <div className="mt-5 flex items-center justify-center gap-3">
         <Button asChild size="lg">
           <Link to="/jobs">Browse jobs</Link>
+        </Button>
+        <Button asChild size="lg" variant="outline">
+          <Link to="/profiles">Browse profiles</Link>
         </Button>
         {!user && (
           <Button asChild size="lg" variant="outline">
