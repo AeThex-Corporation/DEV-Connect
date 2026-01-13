@@ -31,6 +31,130 @@ import { query } from "./db";
 import { getSupabase } from "./supabase";
 import adminRouter from "./routes/admin";
 import { listFeaturedDevs, listFeaturedJobs } from "./routes/featured";
+import {
+  searchDevelopers,
+  getDeveloperProfile,
+  updateDeveloperProfile,
+  getDeveloperStats,
+} from "./routes/developer-profiles";
+import {
+  searchJobs,
+  getJobDetails,
+  createJobPosting,
+  updateJobPosting,
+  applyToJobPosting,
+  getJobApplicants,
+  getJobRecommendations,
+} from "./routes/jobs-enhanced";
+import {
+  getThreads,
+  createThread,
+  getMessages,
+  sendMessage as sendMessageEnhanced,
+  markThreadRead,
+  updateThread,
+  getUnreadCount,
+} from "./routes/messaging";
+import {
+  listTimeEntries,
+  createTimeEntry,
+  updateTimeEntry,
+  deleteTimeEntry,
+  getActiveTimer,
+  startTimer,
+  stopTimer,
+  generateReport,
+} from "./routes/time-tracking";
+import {
+  searchInvoices,
+  getInvoice,
+  createInvoice,
+  updateInvoice,
+  sendInvoice,
+  deleteInvoice,
+  markInvoicePaid,
+} from "./routes/invoicing";
+import {
+  listPlans,
+  getCurrentSubscription,
+  changeSubscription,
+  cancelSubscription,
+  reactivateSubscription,
+  getUsage,
+  listPaymentMethods,
+  addPaymentMethod,
+  removePaymentMethod,
+  getBillingHistory,
+} from "./routes/subscriptions";
+import {
+  searchPortfolio,
+  getPortfolioProject,
+  createPortfolioProject,
+  updatePortfolioProject,
+  deletePortfolioProject,
+  togglePortfolioLike,
+} from "./routes/portfolio";
+import {
+  listTeams,
+  getTeam,
+  createTeam,
+  updateTeam,
+  deleteTeam,
+  inviteToTeam,
+  joinTeam,
+  removeTeamMember,
+} from "./routes/teams";
+import {
+  searchProjects,
+  getProject,
+  createProject,
+  updateProject,
+  deleteProject,
+  getProjectTasks,
+  createTask,
+  updateTask,
+  deleteTask,
+  getProjectAnalytics,
+} from "./routes/projects-mgmt";
+import {
+  getDashboardMetrics,
+  getRevenueAnalytics,
+  getUserAnalytics,
+  getJobAnalytics,
+  getProjectAnalytics as getProjectAnalyticsReport,
+  getPlatformAnalytics,
+} from "./routes/analytics";
+import {
+  listReports,
+  getReport,
+  createReport,
+  updateReport,
+  deleteReport,
+  generateReport,
+  downloadReport,
+} from "./routes/reporting";
+import {
+  listUsers,
+  getUser,
+  updateUser,
+  banUser,
+  unbanUser,
+  getSystemStats,
+  getActivityLogs,
+} from "./routes/admin-mgmt";
+import {
+  listReports as listModerationReports,
+  getReport as getModerationReport,
+  createReport as createModerationReport,
+  updateReport as updateModerationReport,
+  assignReport,
+  takeAction,
+  listFilters,
+  createFilter,
+  updateFilter,
+  deleteFilter,
+  getModerationStats,
+} from "./routes/moderation-mgmt";
 
 async function ensureSchema() {
   // If Supabase is configured, assume schema is managed there
@@ -409,6 +533,12 @@ export function createServer() {
   app.get("/api/featured/devs", listFeaturedDevs);
   app.get("/api/featured/jobs", listFeaturedJobs);
 
+  // Developer Profiles (enhanced)
+  app.get("/api/developers", searchDevelopers);
+  app.get("/api/developers/:id", getDeveloperProfile);
+  app.put("/api/developers/:id", updateDeveloperProfile);
+  app.get("/api/developers/:id/stats", getDeveloperStats);
+
   // Profiles
   app.get("/api/profile/me", getMyProfile);
   app.get("/api/profiles", listProfiles);
@@ -424,6 +554,16 @@ export function createServer() {
   app.post("/api/jobs", createJob);
   app.get("/api/jobs/:id", getJob);
   app.post("/api/jobs/:id/apply", applyToJob);
+  
+  // Enhanced Jobs
+  app.get("/api/jobs/search", searchJobs);
+  app.get("/api/jobs/:id/full", getJobDetails);
+  app.post("/api/jobs/create", createJobPosting);
+  app.put("/api/jobs/:id/update", updateJobPosting);
+  app.post("/api/jobs/:id/apply-enhanced", applyToJobPosting);
+  app.get("/api/jobs/:id/applicants", getJobApplicants);
+  app.get("/api/jobs/recommendations", getJobRecommendations);
+  
   // Jobs count for a specific owner
   app.get("/api/jobs/mine/count", async (req, res) => {
     const owner = String(req.query.owner || "");
@@ -440,6 +580,15 @@ export function createServer() {
   // Messages
   app.get("/api/messages", listThread);
   app.post("/api/messages", sendMessage);
+  
+  // Enhanced Messaging
+  app.get("/api/messages/threads", getThreads);
+  app.post("/api/messages/threads", createThread);
+  app.get("/api/messages/threads/:threadId/messages", getMessages);
+  app.post("/api/messages/threads/:threadId/messages", sendMessageEnhanced);
+  app.patch("/api/messages/threads/:threadId/read", markThreadRead);
+  app.patch("/api/messages/threads/:threadId", updateThread);
+  app.get("/api/messages/unread-count", getUnreadCount);
 
   // Applications
   app.get("/api/applications/incoming", listIncomingApplications);
@@ -581,6 +730,106 @@ export function createServer() {
     }));
     res.json(rows);
   });
+
+  // ========== Phase 2: Time Tracking Routes ==========
+  app.get("/api/time/entries", listTimeEntries);
+  app.post("/api/time/entries", createTimeEntry);
+  app.put("/api/time/entries/:id", updateTimeEntry);
+  app.delete("/api/time/entries/:id", deleteTimeEntry);
+  app.get("/api/time/active", getActiveTimer);
+  app.post("/api/time/start", startTimer);
+  app.post("/api/time/stop", stopTimer);
+  app.post("/api/time/report", generateReport);
+
+  // ========== Phase 2: Invoicing Routes ==========
+  app.get("/api/invoices", searchInvoices);
+  app.get("/api/invoices/:id", getInvoice);
+  app.post("/api/invoices", createInvoice);
+  app.put("/api/invoices/:id", updateInvoice);
+  app.post("/api/invoices/:id/send", sendInvoice);
+  app.delete("/api/invoices/:id", deleteInvoice);
+  app.post("/api/invoices/:id/mark-paid", markInvoicePaid);
+
+  // ========== Phase 2: Subscription & Billing Routes ==========
+  app.get("/api/subscriptions/plans", listPlans);
+  app.get("/api/subscriptions/current", getCurrentSubscription);
+  app.post("/api/subscriptions/change", changeSubscription);
+  app.post("/api/subscriptions/cancel", cancelSubscription);
+  app.post("/api/subscriptions/reactivate", reactivateSubscription);
+  app.get("/api/subscriptions/usage", getUsage);
+  app.get("/api/subscriptions/payment-methods", listPaymentMethods);
+  app.post("/api/subscriptions/payment-methods", addPaymentMethod);
+  app.delete("/api/subscriptions/payment-methods/:id", removePaymentMethod);
+  app.get("/api/subscriptions/billing-history", getBillingHistory);
+
+  // ========== Phase 3: Portfolio Routes ==========
+  app.get("/api/portfolio", searchPortfolio);
+  app.get("/api/portfolio/:id", getPortfolioProject);
+  app.post("/api/portfolio", createPortfolioProject);
+  app.put("/api/portfolio/:id", updatePortfolioProject);
+  app.delete("/api/portfolio/:id", deletePortfolioProject);
+  app.post("/api/portfolio/:id/like", togglePortfolioLike);
+
+  // ========== Phase 3: Team Collaboration Routes ==========
+  app.get("/api/teams", listTeams);
+  app.get("/api/teams/:id", getTeam);
+  app.post("/api/teams", createTeam);
+  app.put("/api/teams/:id", updateTeam);
+  app.delete("/api/teams/:id", deleteTeam);
+  app.post("/api/teams/:id/invite", inviteToTeam);
+  app.post("/api/teams/:id/join", joinTeam);
+  app.delete("/api/teams/:teamId/members/:userId", removeTeamMember);
+
+  // ========== Phase 3: Project Management Routes ==========
+  app.get("/api/projects", searchProjects);
+  app.get("/api/projects/:id", getProject);
+  app.post("/api/projects", createProject);
+  app.put("/api/projects/:id", updateProject);
+  app.delete("/api/projects/:id", deleteProject);
+  app.get("/api/projects/:id/tasks", getProjectTasks);
+  app.post("/api/projects/:id/tasks", createTask);
+  app.put("/api/tasks/:id", updateTask);
+  app.delete("/api/tasks/:id", deleteTask);
+  app.get("/api/projects/:id/analytics", getProjectAnalytics);
+
+  // ========== Phase 4: Analytics Routes ==========
+  app.get("/api/analytics/dashboard", getDashboardMetrics);
+  app.get("/api/analytics/revenue", getRevenueAnalytics);
+  app.get("/api/analytics/users", getUserAnalytics);
+  app.get("/api/analytics/jobs", getJobAnalytics);
+  app.get("/api/analytics/projects", getProjectAnalyticsReport);
+  app.get("/api/analytics/platform", getPlatformAnalytics);
+
+  // ========== Phase 4: Reporting Routes ==========
+  app.get("/api/reports", listReports);
+  app.get("/api/reports/:id", getReport);
+  app.post("/api/reports", createReport);
+  app.put("/api/reports/:id", updateReport);
+  app.delete("/api/reports/:id", deleteReport);
+  app.post("/api/reports/generate", generateReport);
+  app.get("/api/reports/:id/download", downloadReport);
+
+  // ========== Phase 5: Admin Management Routes ==========
+  app.get("/api/admin/users", listUsers);
+  app.get("/api/admin/users/:id", getUser);
+  app.put("/api/admin/users/:id", updateUser);
+  app.post("/api/admin/users/:id/ban", banUser);
+  app.delete("/api/admin/users/:id/ban", unbanUser);
+  app.get("/api/admin/stats", getSystemStats);
+  app.get("/api/admin/activity", getActivityLogs);
+
+  // ========== Phase 5: Content Moderation Routes ==========
+  app.get("/api/moderation/reports", listModerationReports);
+  app.get("/api/moderation/reports/:id", getModerationReport);
+  app.post("/api/moderation/reports", createModerationReport);
+  app.put("/api/moderation/reports/:id", updateModerationReport);
+  app.post("/api/moderation/reports/:id/assign", assignReport);
+  app.post("/api/moderation/reports/:id/action", takeAction);
+  app.get("/api/moderation/filters", listFilters);
+  app.post("/api/moderation/filters", createFilter);
+  app.put("/api/moderation/filters/:id", updateFilter);
+  app.delete("/api/moderation/filters/:id", deleteFilter);
+  app.get("/api/moderation/stats", getModerationStats);
 
   // Site stats
   app.get("/api/stats", async (_req, res) => {
